@@ -1,15 +1,16 @@
 package bot.storage.models;
 
+import lombok.Data;
 import org.jetbrains.annotations.Async;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.util.List;
 
+@Data
 @Entity
 public class GuildEntity {
     @Id
-    @GeneratedValue
     private Integer id;
 
     @Nonnull
@@ -33,4 +34,8 @@ public class GuildEntity {
 
     @OneToMany
     private List<ScheduleEntity> schedules;
+
+    public GuildEntity() {
+
+    }
 }

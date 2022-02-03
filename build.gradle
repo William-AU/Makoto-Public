@@ -33,6 +33,9 @@ dependencies {
 
     // For when we want to actually add makoto pictures
     implementation 'com.github.Kodehawa:imageboard-api:1907d46a98'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }
 
 test {
