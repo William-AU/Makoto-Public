@@ -30,6 +30,11 @@ public class DamageStrategy {
         sheetService.addCarryOver(guildEntity, userId, damage);
     }
 
+    public void redoBattle(Guild guild, String userId, String damage) {
+        GuildEntity guildEntity = guildService.getGuild(guild.getId());
+        sheetService.redoBattle(guildEntity, userId, damage);
+    }
+
     /**
      * Validates the message for addBattle and addCarryover
      * @param message the message with the damage

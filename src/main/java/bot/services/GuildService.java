@@ -48,4 +48,20 @@ public class GuildService {
         guild.setCurrentHealth(newHealth);
         guildRepository.save(guild);
     }
+
+    public String getSpreadSheetId(String guildId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        return guild.getSpreadsheetId();
+    }
+
+    public void addSpreadsheetId(String guildId, String spreadSheetId) throws IllegalArgumentException {
+        if (!verifySpreadsheetId(spreadSheetId)) throw new IllegalArgumentException();
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        guild.setSpreadsheetId(spreadSheetId);
+        guildRepository.save(guild);
+    }
+
+    private boolean verifySpreadsheetId(String spreadsheetId) {
+        return spreadsheetId.contains("/"); // Very simple check but it's what we had before
+    }
 }

@@ -39,4 +39,8 @@ public class CommandContext implements ICommandContext{
     public void reactNegative() {
         getMessage().addReaction(BotConstants.REACT_NEGATIVE).queue();
     }
+
+    public void reactWIP() {
+        getMessage().addReaction(BotConstants.REACT_WIP).queue();
+    }
 }
