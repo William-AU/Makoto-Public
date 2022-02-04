@@ -24,7 +24,7 @@ public class GuildService {
 
     public boolean hasActiveBos(String guildId) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
-        return guild.getBoss() == null;
+        return guild.getBoss() != null;
     }
 
     public GuildEntity getGuild(String guildId) {
@@ -40,12 +40,6 @@ public class GuildService {
     public void setBossTrackerMessage(String guildId, String messageId) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         guild.setBossMessageId(messageId);
-        guildRepository.save(guild);
-    }
-
-    public void setCurrentHealth(String guildId, int newHealth) {
-        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
-        guild.setCurrentHealth(newHealth);
         guildRepository.save(guild);
     }
 

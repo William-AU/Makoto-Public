@@ -97,4 +97,8 @@ public interface ICommandContext {
         return this.getGuild().getSelfMember();
     }
 
+    default String getGuildId() {
+        return getGuild().getId();
+    }
+
 }

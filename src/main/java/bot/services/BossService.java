@@ -51,4 +51,22 @@ public class BossService {
         guild.setCurrentHealth(newBoss.getTotalHealth());
         guildRepository.save(guild);
     }
+
+    public void takeDamage(String guildId, int damage) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        int oldHealth = guild.getCurrentHealth();
+        if (oldHealth - damage < 1) {
+            int carryOver = damage - oldHealth;
+            setNextBoss(guildId);
+            // Reload here because previous call will cause updates to the guild table
+            // There is a way to get a reference to an object instead of just the object (think it's get vs find)
+            // but this should work for now
+            guild = guildRepository.getGuildEntityByGuildId(guildId);
+            guild.setCurrentHealth(guild.getCurrentHealth() - carryOver);
+        }
+        else {
+            guild.setCurrentHealth(oldHealth - damage);
+        }
+        guildRepository.save(guild);
+    }
 }

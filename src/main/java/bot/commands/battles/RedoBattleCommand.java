@@ -20,7 +20,7 @@ public class RedoBattleCommand implements ICommand {
             return;
         }
         String damage = ctx.getMessage().getContentRaw().split(" ")[1];
-        damageStrategy.redoBattle(ctx.getGuild(), ctx.getAuthorID(), damage);
+        damageStrategy.redoBattle(ctx.getGuild(), ctx.getAuthorID(), damage, ctx.getJDA());
         ctx.reactPositive();
     }
 

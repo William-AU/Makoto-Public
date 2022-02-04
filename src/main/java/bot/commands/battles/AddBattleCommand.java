@@ -21,7 +21,7 @@ public class AddBattleCommand implements ICommand {
             return;
         }
         String damage = ctx.getMessage().getContentRaw().split(" ")[1];
-        damageStrategy.addBattle(ctx.getGuild(), ctx.getAuthorID(), damage);
+        damageStrategy.addBattle(ctx.getGuild(), ctx.getAuthorID(), damage, ctx.getJDA());
         ctx.reactPositive();
     }
 

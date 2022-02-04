@@ -1,38 +1,51 @@
 package bot.commands.battles;
 
+import bot.services.BossService;
 import bot.services.GuildService;
 import bot.services.SheetService;
 import bot.storage.models.GuildEntity;
+import bot.tracking.TrackingStrategy;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DamageStrategy {
     private final GuildService guildService;
     private final SheetService sheetService;
+    private final BossService bossService;
+    private final TrackingStrategy trackingStrategy;
 
     @Autowired
-    public DamageStrategy(GuildService guildService, SheetService sheetService) {
+    public DamageStrategy(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
         this.guildService = guildService;
         this.sheetService = sheetService;
+        this.bossService = bossService;
+        this.trackingStrategy = trackingStrategy;
     }
 
-    public void addBattle(Guild guild, String userId, String damage) {
+    public void addBattle(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
         sheetService.addBattle(guildEntity, userId, damage);
+        bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
+        trackingStrategy.updateData(jda, guild.getId());
     }
 
-    public void addCarryover(Guild guild, String userId, String damage) {
+    public void addCarryover(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
         sheetService.addCarryOver(guildEntity, userId, damage);
+        bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
+        trackingStrategy.updateData(jda, guild.getId());
     }
 
-    public void redoBattle(Guild guild, String userId, String damage) {
+    public void redoBattle(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
         sheetService.redoBattle(guildEntity, userId, damage);
+        // TODO: figure out how to update the damage. Not sure how we can get the previous damage done cleanly,
+        //  since that needs to be reverted before this can apply
+        trackingStrategy.updateData(jda, guild.getId());
     }
 
     /**

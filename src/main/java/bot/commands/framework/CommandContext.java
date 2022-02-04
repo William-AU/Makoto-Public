@@ -43,4 +43,13 @@ public class CommandContext implements ICommandContext{
     public void reactWIP() {
         getMessage().addReaction(BotConstants.REACT_WIP).queue();
     }
+
+    public void sendError(String errorMessage) {
+        reactNegative();
+        event.getMessage().reply(errorMessage).queue();
+    }
+
+    public void permissionsError() {
+        sendError("This action requires the administrator flag");
+    }
 }

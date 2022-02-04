@@ -20,7 +20,7 @@ public class AddCarryoverCommand implements ICommand {
             return;
         }
         String damage = ctx.getMessage().getContentRaw().split(" ")[1];
-        damageStrategy.addCarryover(ctx.getGuild(), ctx.getAuthorID(), damage);
+        damageStrategy.addCarryover(ctx.getGuild(), ctx.getAuthorID(), damage, ctx.getJDA());
         ctx.reactPositive();
     }
 
