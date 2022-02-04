@@ -64,4 +64,10 @@ public class GuildService {
     private boolean verifySpreadsheetId(String spreadsheetId) {
         return spreadsheetId.contains("/"); // Very simple check but it's what we had before
     }
+
+    public void setGuildSheetId(String guildId, String sheetId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        guild.setSheetId(sheetId);
+        guildRepository.save(guild);
+    }
 }
