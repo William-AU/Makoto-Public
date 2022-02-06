@@ -25,7 +25,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Discord
-    implementation("net.dv8tion:JDA:5.0.0-alpha.4")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.5")
 
     compile 'com.google.api-client:google-api-client:1.30.4'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.6'

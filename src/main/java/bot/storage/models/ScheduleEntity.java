@@ -2,14 +2,13 @@ package bot.storage.models;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Data
 @Entity
 public class ScheduleEntity {
     @Id
+    @GeneratedValue
     private Integer id;
 
     @OneToOne
@@ -20,4 +19,8 @@ public class ScheduleEntity {
     private String channelId;
 
     private String messageId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
+    private GuildEntity guild;
 }

@@ -69,4 +69,26 @@ public class BossService {
         }
         guildRepository.save(guild);
     }
+
+    /**
+     * Returns the id of the next boss at the given position, will only look forward from the current boss,
+     * if the next boss is on a new stage, it will return the boss of the next stage correctly
+     * @param guildId id of the guild
+     * @param position position of the boss
+     * @return id of next boss at the given position
+     */
+    public int getBossIdFromBossPosition(String guildId, int position) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        BossEntity currentBoss = guild.getBoss();
+        int currentPosition = currentBoss.getPosition();
+        int currentStage = currentBoss.getStage();
+        if (position == currentPosition) return currentBoss.getId();
+        if (position > currentPosition) return bossRepository.findBossEntityByStageAndPosition(currentStage, position).getId();
+        if (currentStage + 1 == 4 || currentStage + 1 == 11) return bossRepository.findBossEntityByStageAndPosition(currentStage + 1, position).getId();
+        return bossRepository.findBossEntityByStageAndPosition(currentStage, position).getId();
+    }
+
+    public BossEntity getBossFromId(String bossId) {
+        return bossRepository.findBossEntityById(Integer.parseInt(bossId));
+    }
 }

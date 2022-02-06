@@ -12,14 +12,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class GuildService {
     private final GuildRepository guildRepository;
-    private final BossRepository bossRepository;
-    private final ScheduleRepository scheduleRepository;
 
     @Autowired
     public GuildService(GuildRepository guildRepository, BossRepository bossRepository, ScheduleRepository scheduleRepository) {
         this.guildRepository = guildRepository;
-        this.bossRepository = bossRepository;
-        this.scheduleRepository = scheduleRepository;
     }
 
     public boolean hasActiveBos(String guildId) {
