@@ -1,4 +1,4 @@
-package bot.tracking;
+package bot.commands.tracking;
 
 import bot.commands.framework.CommandContext;
 import bot.services.BossService;

@@ -19,4 +19,8 @@ public class ScheduleEntity {
     private String channelId;
 
     private String messageId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
+    private GuildEntity guild;
 }

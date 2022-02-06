@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Async;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+import java.lang.invoke.CallSite;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,8 +35,12 @@ public class GuildEntity {
 
     private Integer lap;
 
-    @OneToMany
+    @OneToMany(mappedBy = "guild", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ScheduleEntity> schedules;
+
+    public void addSchedule(ScheduleEntity schedule) {
+        schedules.add(schedule);
+    }
 
     public GuildEntity() {
 

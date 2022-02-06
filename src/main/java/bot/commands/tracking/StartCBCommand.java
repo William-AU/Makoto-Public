@@ -1,4 +1,4 @@
-package bot.tracking;
+package bot.commands.tracking;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
@@ -35,6 +35,7 @@ public class StartCBCommand implements ICommand {
             return;
         }
         trackingStrategy.startTracking(ctx);
+        ctx.reactPositive();
     }
 
     @Override

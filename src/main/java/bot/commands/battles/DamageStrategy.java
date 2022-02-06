@@ -4,7 +4,7 @@ import bot.services.BossService;
 import bot.services.GuildService;
 import bot.services.SheetService;
 import bot.storage.models.GuildEntity;
-import bot.tracking.TrackingStrategy;
+import bot.commands.tracking.TrackingStrategy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
