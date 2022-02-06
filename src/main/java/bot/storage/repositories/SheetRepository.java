@@ -44,8 +44,10 @@ public class SheetRepository {
     private String sheetTable;
     @Value("${sheet.members}")
     private String sheetMembers;
-    @Value("${sheet.base.id}")
+    @Value("${sheet.base.spreadsheet}")
     private String BASE_SPREADSHEET_ID;
+    @Value("${sheet.base.sheet}")
+    private int BASE_SHEET_ID;
 
     private static final String APPLICATION_NAME = "Makoto";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -171,13 +173,13 @@ public class SheetRepository {
     }
 
     public SheetProperties setupBaseSpreadsheet(String spreadsheetId) {
-        if (!verifyIfSheetExists(sheetName, spreadsheetId)) throw new IllegalArgumentException("Sheet already exists");
-        SheetProperties properties = copySheet(BASE_SPREADSHEET_ID, 133099640, spreadsheetId);
-        ArrayList<Request> requests = new ArrayList<>() {{
-            new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest()
-                    .setProperties(properties.setTitle(sheetName))
-                    .setFields("title"));
-        }};
+        if (verifyIfSheetExists(sheetName, spreadsheetId)) throw new IllegalArgumentException("Sheet already exists");
+        SheetProperties properties = copySheet(BASE_SPREADSHEET_ID, BASE_SHEET_ID, spreadsheetId);
+        ArrayList<Request> requests = new ArrayList<>();
+        requests.add(new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest()
+                .setProperties(properties.setTitle(sheetName))
+                .setFields("title")));
+
         try {
             service.spreadsheets().batchUpdate(spreadsheetId, new BatchUpdateSpreadsheetRequest().setRequests(requests)).execute();
             return properties;

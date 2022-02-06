@@ -49,14 +49,13 @@ public class GuildService {
     }
 
     public void addSpreadsheetId(String guildId, String spreadSheetId) throws IllegalArgumentException {
-        if (!verifySpreadsheetId(spreadSheetId)) throw new IllegalArgumentException();
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        if(guild == null){
+            guild = new GuildEntity();
+            guild.setGuildId(guildId);
+        }
         guild.setSpreadsheetId(spreadSheetId);
         guildRepository.save(guild);
-    }
-
-    private boolean verifySpreadsheetId(String spreadsheetId) {
-        return spreadsheetId.contains("/"); // Very simple check but it's what we had before
     }
 
     public void setGuildSheetId(String guildId, String sheetId) {

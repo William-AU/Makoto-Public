@@ -2,6 +2,7 @@ package bot.commands.battles;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
+import net.dv8tion.jda.api.entities.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,14 @@ public class AddBattleForCommand implements ICommand {
             return;
         }
         String damage = ctx.getMessage().getContentRaw().split(" ")[1];
-        damageStrategy.addBattle(ctx.getGuild(), ctx.getAuthorID(), damage, ctx.getJDA());
+        List<Member> mentionedMembers = ctx.getMessage().getMentionedMembers();
+        if(mentionedMembers.isEmpty()){
+            ctx.reactNegative();
+            return;
+        }
+
+        String userID = mentionedMembers.get(0).getUser().getId();
+        damageStrategy.addBattle(ctx.getGuild(), userID, damage, ctx.getJDA());
         ctx.reactPositive();
     }
 

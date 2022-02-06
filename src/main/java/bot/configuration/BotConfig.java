@@ -44,7 +44,7 @@ public class BotConfig {
 
         jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
         jdaBuilder.enableCache(CacheFlag.CLIENT_STATUS);
-        jdaBuilder.setActivity(Activity.of(Activity.ActivityType.COMPETING, "Competing in CB!"));
+        jdaBuilder.setActivity(Activity.of(Activity.ActivityType.COMPETING, "CB!"));
 
         commandList.forEach(command ->
                 command.getIdentifiers().forEach(identifier ->

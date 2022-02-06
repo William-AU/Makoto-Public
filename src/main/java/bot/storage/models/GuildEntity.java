@@ -11,6 +11,7 @@ import java.util.List;
 @Entity
 public class GuildEntity {
     @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
 
     @Nonnull

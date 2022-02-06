@@ -2,14 +2,13 @@ package bot.storage.models;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Data
 @Entity
 public class ScheduleEntity {
     @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
 
     @OneToOne
