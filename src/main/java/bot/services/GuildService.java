@@ -1,5 +1,6 @@
 package bot.services;
 
+import bot.configuration.GuildImagePreference;
 import bot.storage.models.BossEntity;
 import bot.storage.models.GuildEntity;
 import bot.storage.repositories.BossRepository;
@@ -57,6 +58,12 @@ public class GuildService {
     public void setGuildSheetId(String guildId, String sheetId) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         guild.setSheetId(sheetId);
+        guildRepository.save(guild);
+    }
+
+    public void setImagePreference(String guildId, GuildImagePreference preference) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        guild.setImagePreference(preference);
         guildRepository.save(guild);
     }
 }

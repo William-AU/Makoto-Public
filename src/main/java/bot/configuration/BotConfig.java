@@ -1,13 +1,22 @@
 package bot.configuration;
 
+import bot.commands.battles.strategies.BasicDamageStrategy;
+import bot.commands.battles.strategies.DamageBasedPictureStrategy;
+import bot.commands.battles.strategies.DamageStrategy;
+import bot.commands.battles.strategies.PictureStrategy;
 import bot.commands.framework.ICommand;
+import bot.commands.tracking.TrackingStrategy;
 import bot.listeners.CommandListener;
+import bot.services.BossService;
+import bot.services.GuildService;
+import bot.services.SheetService;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +32,19 @@ public class BotConfig {
     private String token;
 
     private static final Map<String, ICommand> commands = new HashMap<>();
+
+    private final GuildService guildService;
+    private final SheetService sheetService;
+    private final BossService bossService;
+    private final TrackingStrategy trackingStrategy;
+
+    @Autowired
+    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
+        this.guildService = guildService;
+        this.sheetService = sheetService;
+        this.bossService = bossService;
+        this.trackingStrategy = trackingStrategy;
+    }
 
     @Bean
     public JDA jda(List<ICommand> commandList) throws LoginException {
@@ -54,5 +76,16 @@ public class BotConfig {
         jdaBuilder.addEventListeners(new CommandListener(commands));
 
         return jdaBuilder.build();
+    }
+
+    // Define strategies here
+    @Bean
+    public DamageStrategy damageStrategy() {
+        return new BasicDamageStrategy(guildService, sheetService, bossService, trackingStrategy);
+    }
+
+    @Bean
+    public PictureStrategy pictureStrategy() {
+        return new DamageBasedPictureStrategy(guildService);
     }
 }

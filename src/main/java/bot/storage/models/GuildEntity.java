@@ -1,5 +1,6 @@
 package bot.storage.models;
 
+import bot.configuration.GuildImagePreference;
 import lombok.Data;
 import org.jetbrains.annotations.Async;
 
@@ -41,6 +42,10 @@ public class GuildEntity {
     public void addSchedule(ScheduleEntity schedule) {
         schedules.add(schedule);
     }
+
+    @Column(columnDefinition = "varchar(16) default 'NONE'")
+    @Enumerated(EnumType.STRING)
+    private GuildImagePreference imagePreference;
 
     public GuildEntity() {
 

@@ -1,11 +1,12 @@
 package bot.commands.battles;
 
+import bot.commands.battles.strategies.DamageStrategy;
+import bot.commands.battles.strategies.PictureStrategy;
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +14,9 @@ import java.util.List;
 public class AddBattleCommand implements ICommand {
     @Autowired
     private DamageStrategy damageStrategy;
+
+    @Autowired
+    private PictureStrategy pictureStrategy;
 
     @Override
     public void handle(CommandContext ctx) {
@@ -22,6 +26,7 @@ public class AddBattleCommand implements ICommand {
         }
         String damage = ctx.getMessage().getContentRaw().split(" ")[1];
         damageStrategy.addBattle(ctx.getGuild(), ctx.getAuthorID(), damage, ctx.getJDA());
+        pictureStrategy.display(ctx, Integer.parseInt(damage));
         ctx.reactPositive();
     }
 

@@ -1,5 +1,6 @@
 package bot.commands.battles;
 
+import bot.commands.battles.strategies.DamageStrategy;
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
 import net.dv8tion.jda.api.entities.Member;

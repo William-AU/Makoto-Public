@@ -1,4 +1,4 @@
-package bot.commands.battles;
+package bot.commands.battles.strategies;
 
 import bot.services.BossService;
 import bot.services.GuildService;
@@ -12,20 +12,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DamageStrategy {
+public class BasicDamageStrategy implements DamageStrategy {
     private final GuildService guildService;
     private final SheetService sheetService;
     private final BossService bossService;
     private final TrackingStrategy trackingStrategy;
 
     @Autowired
-    public DamageStrategy(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
+    public BasicDamageStrategy(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
         this.guildService = guildService;
         this.sheetService = sheetService;
         this.bossService = bossService;
         this.trackingStrategy = trackingStrategy;
     }
 
+    @Override
     public void addBattle(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
         sheetService.addBattle(guildEntity, userId, damage);
@@ -33,6 +34,7 @@ public class DamageStrategy {
         trackingStrategy.updateData(jda, guild.getId());
     }
 
+    @Override
     public void addCarryover(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
         sheetService.addCarryOver(guildEntity, userId, damage);
@@ -40,6 +42,7 @@ public class DamageStrategy {
         trackingStrategy.updateData(jda, guild.getId());
     }
 
+    @Override
     public void redoBattle(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
         sheetService.redoBattle(guildEntity, userId, damage);
@@ -53,6 +56,7 @@ public class DamageStrategy {
      * @param message the message with the damage
      * @return true if validation was successful, false otherwise
      */
+    @Override
     public boolean validatePersonal(Message message) {
         String[] content = message.getContentRaw().split(" ");
         if (content.length != 2) return false;
@@ -70,6 +74,7 @@ public class DamageStrategy {
      * @param message the message with the damage and user
      * @return true if validation was successful, false otherwise
      */
+    @Override
     public boolean validateForOther(Message message) {
         String[] content = message.getContentRaw().split(" ");
         if (content.length != 3) return false;
