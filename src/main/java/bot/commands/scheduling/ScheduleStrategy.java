@@ -7,9 +7,11 @@ import bot.services.GuildService;
 import bot.services.ScheduleService;
 import bot.storage.models.BossEntity;
 import bot.storage.models.GuildEntity;
+import bot.storage.models.ScheduleEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ public class ScheduleStrategy {
         boolean isCurrentBoss = guild.getBoss().equals(boss);
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Scheduling for " + boss.getName());
+        // IMPORTANT: When changing this, just extract it to a field, this is effectively also used as an ID, and all the code will break if only this is changed
         eb.addField("Attacks ready", formatUserList(attacking), true);
         eb.addField("Have attacked", formatUserList(attacked), true);
         if (isCurrentBoss) {
@@ -70,6 +73,7 @@ public class ScheduleStrategy {
     private List<String> extractUserList(String fieldContent) {
         String[] rawUsers = fieldContent.split("\n");
         List<String> result = new ArrayList<>();
+        // TODO: Add support for strikethrough names
         for (String user : rawUsers) {
             String[] split = user.split(" - ");
             result.add(split[1]);
@@ -133,14 +137,37 @@ public class ScheduleStrategy {
     }
 
     public void deleteSchedule(CommandContext ctx, int bossPosition) {
-
+        // TODO: Throw exception if schedule doesn't exist
+        int bossId = bossService.getBossIdFromBossPosition(ctx.getGuildId(), bossPosition);
+        ScheduleEntity scheduleEntity = scheduleService.getScheduleByGuildIdAndBossId(ctx.getGuildId(), bossId);
+        String channelId = scheduleEntity.getChannelId();
+        String messageId = scheduleEntity.getMessageId();
+        ctx.getGuild().getTextChannelById(channelId).deleteMessageById(messageId).queue();
     }
 
-    public void updateData(JDA jda, String guildId, int bossPosition) {
+    public void updateSchedule(JDA jda, String guildId, int bossPosition) {
+        if (!hasActiveSchedule(guildId, bossPosition)) return;
 
-    }
-
-    public void updateSchedule(CommandContext ctx, int bossPosition) {
-
+        int bossId = bossService.getBossIdFromBossPosition(guildId, bossPosition);
+        ScheduleEntity scheduleEntity = scheduleService.getScheduleByGuildIdAndBossId(guildId, bossId);
+        String channelId = scheduleEntity.getChannelId();
+        String messageId = scheduleEntity.getMessageId();
+        TextChannel channel = jda.getGuildById(guildId).getTextChannelById(channelId);
+        channel.retrieveMessageById(messageId).queue(message -> {
+            MessageEmbed oldEmbed = message.getEmbeds().get(0);
+            List<MessageEmbed.Field> fields = oldEmbed.getFields();
+            List<String> attackingList = new ArrayList<>();
+            List<String> attackedList = new ArrayList<>();
+            for (MessageEmbed.Field field : fields) {
+                if (field.getName().equals("Attacks ready")) {
+                    attackingList = extractUserList(field.getValue());
+                }
+                if (field.getName().equals("Have attacked")) {
+                    attackedList = extractUserList(field.getValue());
+                }
+            }
+            MessageEmbed newEmbed = createEmbed(guildId, bossId, attackingList, attackedList);
+            channel.editMessageEmbedsById(messageId, newEmbed).queue();
+        });
     }
 }

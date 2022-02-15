@@ -1,5 +1,6 @@
 package bot.commands.battles.strategies;
 
+import bot.commands.scheduling.ScheduleStrategy;
 import bot.services.BossService;
 import bot.services.GuildService;
 import bot.services.SheetService;
@@ -13,17 +14,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BasicDamageStrategy implements DamageStrategy {
+    // FIXME: Responsibility bloat
     private final GuildService guildService;
     private final SheetService sheetService;
     private final BossService bossService;
     private final TrackingStrategy trackingStrategy;
+    private final ScheduleStrategy scheduleStrategy;
 
     @Autowired
-    public BasicDamageStrategy(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
+    public BasicDamageStrategy(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, ScheduleStrategy scheduleStrategy) {
         this.guildService = guildService;
         this.sheetService = sheetService;
         this.bossService = bossService;
         this.trackingStrategy = trackingStrategy;
+        this.scheduleStrategy = scheduleStrategy;
     }
 
     @Override
@@ -32,6 +36,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         sheetService.addBattle(guildEntity, userId, damage);
         bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId());
+        scheduleStrategy.updateSchedule(jda, guild.getId(), guildEntity.getBoss().getPosition());
     }
 
     @Override
@@ -40,6 +45,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         sheetService.addCarryOver(guildEntity, userId, damage);
         bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId());
+        scheduleStrategy.updateSchedule(jda, guild.getId(), guildEntity.getBoss().getPosition());
     }
 
     @Override
@@ -49,6 +55,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         // TODO: figure out how to update the damage. Not sure how we can get the previous damage done cleanly,
         //  since that needs to be reverted before this can apply
         trackingStrategy.updateData(jda, guild.getId());
+        scheduleStrategy.updateSchedule(jda, guild.getId(), guildEntity.getBoss().getPosition());
     }
 
     /**

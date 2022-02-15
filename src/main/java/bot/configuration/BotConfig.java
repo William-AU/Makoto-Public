@@ -5,6 +5,7 @@ import bot.commands.battles.strategies.DamageBasedPictureStrategy;
 import bot.commands.battles.strategies.DamageStrategy;
 import bot.commands.battles.strategies.PictureStrategy;
 import bot.commands.framework.ICommand;
+import bot.commands.scheduling.ScheduleStrategy;
 import bot.commands.tracking.TrackingStrategy;
 import bot.listeners.CommandListener;
 import bot.services.BossService;
@@ -37,13 +38,15 @@ public class BotConfig {
     private final SheetService sheetService;
     private final BossService bossService;
     private final TrackingStrategy trackingStrategy;
+    private final ScheduleStrategy scheduleStrategy;
 
     @Autowired
-    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
+    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, ScheduleStrategy scheduleStrategy) {
         this.guildService = guildService;
         this.sheetService = sheetService;
         this.bossService = bossService;
         this.trackingStrategy = trackingStrategy;
+        this.scheduleStrategy = scheduleStrategy;
     }
 
     @Bean
@@ -81,7 +84,7 @@ public class BotConfig {
     // Define strategies here
     @Bean
     public DamageStrategy damageStrategy() {
-        return new BasicDamageStrategy(guildService, sheetService, bossService, trackingStrategy);
+        return new BasicDamageStrategy(guildService, sheetService, bossService, trackingStrategy, scheduleStrategy);
     }
 
     @Bean
