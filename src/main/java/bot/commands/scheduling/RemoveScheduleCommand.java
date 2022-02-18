@@ -24,18 +24,11 @@ public class RemoveScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        int bossPosition;
-        try {
-            bossPosition = scheduleStrategy.parseBoss(ctx.getMessage().getContentRaw().split(" "));
-        } catch (IllegalArgumentException e) {
-            ctx.sendError(e.getMessage());
-            return;
-        }
-        if (!scheduleStrategy.hasActiveSchedule(ctx.getGuildId(), bossPosition)) {
+        if (!scheduleStrategy.hasActiveSchedule(ctx.getGuildId())) {
             ctx.sendError("There is no schedule for the specified boss");
             return;
         }
-        scheduleStrategy.deleteSchedule(ctx, bossPosition);
+        scheduleStrategy.deleteSchedule(ctx);
         ctx.reactPositive();
     }
 

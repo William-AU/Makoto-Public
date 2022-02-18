@@ -36,12 +36,8 @@ public class GuildEntity {
 
     private Integer lap;
 
-    @OneToMany(mappedBy = "guild", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<ScheduleEntity> schedules;
-
-    public void addSchedule(ScheduleEntity schedule) {
-        schedules.add(schedule);
-    }
+    @OneToOne
+    private ScheduleEntity schedule;
 
     @Column(columnDefinition = "varchar(16) default 'NONE'")
     @Enumerated(EnumType.STRING)

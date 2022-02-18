@@ -1,25 +1,25 @@
-package bot.commands;
+package bot.commands.misc;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
-import bot.services.GuildService;
-import bot.storage.models.BossEntity;
+import bot.commands.scheduling.ScheduleStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @Service
 public class TestCommand implements ICommand {
     @Autowired
-    private GuildService guildService;
+    private ScheduleStrategy scheduleStrategy;
 
     @Override
     public void handle(CommandContext ctx) {
+        scheduleStrategy.extractMembers(ctx.getJDA(), ctx.getGuildId());
         System.out.println(ctx.getMessage().getContentRaw());
-        System.out.println(Arrays.toString(ctx.getMessage().getContentRaw().split(" ")));
+        String content = ctx.getMessage().getContentRaw().split(" ")[1];
+        System.out.println(content.substring(3, content.length() - 1));
     }
 
     @Override

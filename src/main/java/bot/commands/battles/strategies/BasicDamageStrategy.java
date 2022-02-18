@@ -36,7 +36,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         sheetService.addBattle(guildEntity, userId, damage);
         bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId());
-        scheduleStrategy.updateSchedule(jda, guild.getId(), guildEntity.getBoss().getPosition());
+        scheduleStrategy.updateSchedule(jda, guild.getId());
     }
 
     @Override
@@ -45,7 +45,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         sheetService.addCarryOver(guildEntity, userId, damage);
         bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId());
-        scheduleStrategy.updateSchedule(jda, guild.getId(), guildEntity.getBoss().getPosition());
+        scheduleStrategy.updateSchedule(jda, guild.getId());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         // TODO: figure out how to update the damage. Not sure how we can get the previous damage done cleanly,
         //  since that needs to be reverted before this can apply
         trackingStrategy.updateData(jda, guild.getId());
-        scheduleStrategy.updateSchedule(jda, guild.getId(), guildEntity.getBoss().getPosition());
+        scheduleStrategy.updateSchedule(jda, guild.getId());
     }
 
     /**

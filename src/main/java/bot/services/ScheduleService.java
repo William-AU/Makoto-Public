@@ -1,5 +1,6 @@
 package bot.services;
 
+import bot.common.CBUtils;
 import bot.exceptions.ScheduleDoesNotExistException;
 import bot.storage.models.BossEntity;
 import bot.storage.models.GuildEntity;
@@ -8,6 +9,11 @@ import bot.storage.repositories.GuildRepository;
 import bot.storage.repositories.ScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ScheduleService {
@@ -22,40 +28,51 @@ public class ScheduleService {
         this.bossService = bossService;
     }
 
-    public boolean hasActiveScheduleForBoss(String guildId, int bossId) {
-        return getScheduleByGuildIdAndBossId(guildId, bossId) != null;
+    public boolean hasActiveScheduleForBoss(String guildId) {
+        return getScheduleByGuildId(guildId) != null;
     }
 
-    public ScheduleEntity getScheduleByGuildIdAndBossId(String guildId, int bossId) {
+    public ScheduleEntity getScheduleByGuildId(String guildId) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
-        for (ScheduleEntity schedule : guild.getSchedules()) {
-            if (schedule.getBoss().getId().equals(bossId)) return schedule;
-        }
-        return null;
+        return guild.getSchedule();
     }
 
-    public void setChannelId(String guildId, int bossId, String channelId) throws ScheduleDoesNotExistException {
-        ScheduleEntity schedule = getScheduleByGuildIdAndBossId(guildId, bossId);
+    public void setChannelId(String guildId, String channelId) throws ScheduleDoesNotExistException {
+        ScheduleEntity schedule = getScheduleByGuildId(guildId);
         if (schedule == null) throw new ScheduleDoesNotExistException();
         schedule.setChannelId(channelId);
         scheduleRepository.save(schedule);
     }
 
-    public void setMessageId(String guildId, int bossId, String messageId) throws ScheduleDoesNotExistException {
-        ScheduleEntity schedule = getScheduleByGuildIdAndBossId(guildId, bossId);
+    public void setMessageId(String guildId, String messageId) throws ScheduleDoesNotExistException {
+        ScheduleEntity schedule = getScheduleByGuildId(guildId);
         if (schedule == null) throw new ScheduleDoesNotExistException();
         schedule.setMessageId(messageId);
         scheduleRepository.save(schedule);
     }
 
-    public void createScheduleForGuildAndBoss(String guildId, int bossId) {
-        ScheduleEntity schedule = new ScheduleEntity();
-        BossEntity boss = bossService.getBossFromId(bossId + "");
+    public void createScheduleForGuild(String guildId) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
-        schedule.setBoss(boss);
-        guild.addSchedule(schedule);
+        ScheduleEntity schedule = new ScheduleEntity();
+        int currentStage = CBUtils.getStageFromLap(guild.getLap());
+        int nextStage = CBUtils.getStageFromLap(guild.getLap() + 1);
+        Map<Integer, Integer> positionIdMap = new HashMap<>();
+        List<BossEntity> bossEntities = bossService.getBossesBetweenPositionAndStage(1, 5, currentStage, nextStage);
+        for (BossEntity boss : bossEntities) {
+            if (boss.getStage() == currentStage) {
+                positionIdMap.put(boss.getPosition(), boss.getId());
+            }
+            if (boss.getStage() == nextStage) {
+                positionIdMap.put(boss.getPosition() + 5, boss.getId());
+            }
+        }
         schedule.setGuild(guild);
+        schedule.setCurrentLap(guild.getLap());
+        schedule.setPositionBossIdMap(positionIdMap);
         scheduleRepository.save(schedule);
+        guild.setSchedule(schedule);
         guildRepository.save(guild);
     }
+
+
 }

@@ -25,14 +25,7 @@ public class ResetScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        int bossPosition;
-        try {
-            bossPosition = scheduleStrategy.parseBoss(ctx.getMessage().getContentRaw().split(" "));
-        } catch (IllegalArgumentException e) {
-            ctx.sendError(e.getMessage());
-            return;
-        }
-        scheduleStrategy.createSchedule(ctx, bossPosition);
+        scheduleStrategy.createSchedule(ctx);
         ctx.reactPositive();
     }
 

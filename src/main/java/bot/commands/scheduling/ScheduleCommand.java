@@ -24,18 +24,11 @@ public class ScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        int bossPosition;
-        try {
-            bossPosition = scheduleStrategy.parseBoss(ctx.getMessage().getContentRaw().split(" "));
-        } catch (IllegalArgumentException e) {
-            ctx.sendError(e.getMessage());
-            return;
-        }
-        if (scheduleStrategy.hasActiveSchedule(ctx.getGuildId(), bossPosition)) {
+        if (scheduleStrategy.hasActiveSchedule(ctx.getGuildId())) {
             ctx.sendError("A schedule is already tracking this boss, use `!resetschedule <Boss position>` or `!removeschedule <Boss position>`");
             return;
         }
-        scheduleStrategy.createSchedule(ctx, bossPosition);
+        scheduleStrategy.createSchedule(ctx);
         ctx.reactPositive();
     }
 

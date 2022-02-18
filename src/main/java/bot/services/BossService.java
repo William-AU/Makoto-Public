@@ -7,6 +7,8 @@ import bot.storage.repositories.GuildRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BossService {
     private final GuildRepository guildRepository;
@@ -88,7 +90,15 @@ public class BossService {
         return bossRepository.findBossEntityByStageAndPosition(currentStage, position).getId();
     }
 
-    public BossEntity getBossFromId(String bossId) {
-        return bossRepository.findBossEntityById(Integer.parseInt(bossId));
+    public BossEntity getBossFromId(Integer bossId) {
+        return bossRepository.findBossEntityById(bossId);
+    }
+
+    public List<BossEntity> getBossesBetweenPositionAndStage(Integer minPos, Integer maxPos, Integer minStage, Integer maxStage) {
+        return bossRepository.findBossEntitiesByPositionBetweenAndStageBetween(minPos, maxPos, minStage, maxStage);
+    }
+
+    public Integer getPositionFromBossName(String bossName) {
+        return bossRepository.findBossEntityByNameAndStage(bossName, 1).getPosition();
     }
 }
