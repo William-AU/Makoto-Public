@@ -6,6 +6,7 @@ import bot.services.GuildService;
 import bot.services.SheetService;
 import bot.storage.models.GuildEntity;
 import bot.commands.tracking.TrackingStrategy;
+import lombok.SneakyThrows;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -30,6 +31,14 @@ public class BasicDamageStrategy implements DamageStrategy {
         this.scheduleStrategy = scheduleStrategy;
     }
 
+    // This exception can just be ignored, because the isAttackingCurrentBoss check will always prevent markFinished from throwing exceptions
+    @SneakyThrows
+    private void updateSchedule(JDA jda, String guildId, String userName) {
+        if (!scheduleStrategy.isAttackingCurrentBoss(jda, guildId, userName)) return;
+        int currentPosition = guildService.getGuild(guildId).getBoss().getPosition();
+        scheduleStrategy.markFinished(jda, guildId, currentPosition, userName);
+    }
+
     @Override
     public void addBattle(Guild guild, String userId, String damage, JDA jda) {
         GuildEntity guildEntity = guildService.getGuild(guild.getId());
@@ -37,6 +46,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId());
         scheduleStrategy.updateSchedule(jda, guild.getId());
+        updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getEffectiveName());
     }
 
     @Override
@@ -46,6 +56,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId());
         scheduleStrategy.updateSchedule(jda, guild.getId());
+        updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getEffectiveName());
     }
 
     @Override

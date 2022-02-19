@@ -27,6 +27,9 @@ public class ScheduleStrategy {
     private final ScheduleService scheduleService;
     private final GuildService guildService;
     private final BossService bossService;
+    // To prevent errors
+    private final String ATTACKING = "attacking";
+    private final String ATTACKED = "attacked";
 
     @Autowired
     public ScheduleStrategy(ScheduleService scheduleService, GuildService guildService, BossService bossService) {
@@ -174,8 +177,8 @@ public class ScheduleStrategy {
                 }
             }
         }
-        result.put("attacking", attackingMap);
-        result.put("attacked", attackedMap);
+        result.put(ATTACKING, attackingMap);
+        result.put(ATTACKED, attackedMap);
         System.out.println(result);
         return result;
     }
@@ -224,15 +227,15 @@ public class ScheduleStrategy {
 
     public void updateSchedule(JDA jda, String guildId) {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
-        Map<Integer, List<String>> attackers = allMembers.get("attacking");
-        Map<Integer, List<String>> attacked = allMembers.get("attacked");
+        Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
+        Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageEmbedsById(schedule.getMessageId(), createEmbed(guildId, attackers, attacked)).queue();
     }
 
     public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
-        Map<Integer, List<String>> attackers = allMembers.get("attacking");
+        Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         if (attackers.get(position).contains(name)) throw new MemberAlreadyExistsException();
         attackers.get(position).add(name);
         Map<Integer, List<String>> attacked = allMembers.get("attacked");
@@ -242,8 +245,8 @@ public class ScheduleStrategy {
 
     public void removeAttacker(JDA jda, String guildId, Integer position, String name) throws MemberIsNotAttackingException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
-        Map<Integer, List<String>> attackers = allMembers.get("attacking");
-        Map<Integer, List<String>> attacked = allMembers.get("attacked");
+        Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
+        Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         if (!(attackers.get(position).contains(name) || attacked.get(position).contains(name))) throw new MemberIsNotAttackingException();
         attackers.get(position).remove(name);
@@ -253,8 +256,8 @@ public class ScheduleStrategy {
 
     public void markFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
-        Map<Integer, List<String>> attackers = allMembers.get("attacking");
-        Map<Integer, List<String>> attacked = allMembers.get("attacked");
+        Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
+        Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
         if (attacked.get(position).contains(name)) throw new MemberHasAlreadyAttackedException();
         if (!attackers.get(position).contains(name)) throw new MemberIsNotAttackingException();
         attackers.get(position).remove(name);
@@ -265,8 +268,8 @@ public class ScheduleStrategy {
 
     public void unMarkFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasNotAttackedException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
-        Map<Integer, List<String>> attackers = allMembers.get("attacking");
-        Map<Integer, List<String>> attacked = allMembers.get("attacked");
+        Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
+        Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
         if (!attacked.get(position).contains(name)) throw new MemberHasNotAttackedException();
         attacked.get(position).remove(name);
         attackers.get(position).add(name);
@@ -321,5 +324,20 @@ public class ScheduleStrategy {
             throw new Exception("The lap must be either the current lap or the next lap, scheduling further than the next lap is not currently supported");
         }
         return lap;
+    }
+
+    /**
+     * Checks if a given user is currently signed up for the current boss of the guild
+     * @param jda The discord JDA
+     * @param guildId GuildID of the user
+     * @param user The display name of the user
+     * @return true if the user is signed up for the current boss and has not completed their attack
+     */
+    public boolean isAttackingCurrentBoss(JDA jda, String guildId, String user) {
+        GuildEntity guild = guildService.getGuild(guildId);
+        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        Map<Integer, List<String>> attackingMap = extractMembers(jda, guildId).get(ATTACKING);
+        int position = guild.getBoss().getPosition();
+        return attackingMap.get(position).contains(user);
     }
 }
