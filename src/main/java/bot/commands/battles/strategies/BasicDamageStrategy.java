@@ -34,6 +34,7 @@ public class BasicDamageStrategy implements DamageStrategy {
     // This exception can just be ignored, because the isAttackingCurrentBoss check will always prevent markFinished from throwing exceptions
     @SneakyThrows
     private void updateSchedule(JDA jda, String guildId, String userName) {
+        if (!scheduleStrategy.hasActiveSchedule(guildId)) return;
         if (!scheduleStrategy.isAttackingCurrentBoss(jda, guildId, userName)) return;
         int currentPosition = guildService.getGuild(guildId).getBoss().getPosition();
         scheduleStrategy.markFinished(jda, guildId, currentPosition, userName);

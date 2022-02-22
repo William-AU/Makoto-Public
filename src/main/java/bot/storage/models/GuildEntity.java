@@ -39,9 +39,8 @@ public class GuildEntity {
     @OneToOne
     private ScheduleEntity schedule;
 
-    @Column(columnDefinition = "varchar(16) default 'NONE'")
     @Enumerated(EnumType.STRING)
-    private GuildImagePreference imagePreference;
+    private GuildImagePreference imagePreference = GuildImagePreference.NONE;
 
     public GuildEntity() {
 

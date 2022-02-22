@@ -56,14 +56,14 @@ public class ScheduleService {
         ScheduleEntity schedule = new ScheduleEntity();
         int currentStage = CBUtils.getStageFromLap(guild.getLap());
         int nextStage = CBUtils.getStageFromLap(guild.getLap() + 1);
-        Map<Integer, Integer> positionIdMap = new HashMap<>();
+        Map<Integer, BossEntity> positionIdMap = new HashMap<>();
         List<BossEntity> bossEntities = bossService.getBossesBetweenPositionAndStage(1, 5, currentStage, nextStage);
         for (BossEntity boss : bossEntities) {
             if (boss.getStage() == currentStage) {
-                positionIdMap.put(boss.getPosition(), boss.getId());
+                positionIdMap.put(boss.getPosition(), boss);
             }
             if (boss.getStage() == nextStage) {
-                positionIdMap.put(boss.getPosition() + 5, boss.getId());
+                positionIdMap.put(boss.getPosition() + 5, boss);
             }
         }
         schedule.setGuild(guild);
@@ -75,4 +75,11 @@ public class ScheduleService {
     }
 
 
+    public void deleteSchedule(String guildId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        ScheduleEntity oldSchedule = guild.getSchedule();
+        if (oldSchedule == null) return;
+        guild.setSchedule(null);
+        scheduleRepository.delete(oldSchedule);
+    }
 }

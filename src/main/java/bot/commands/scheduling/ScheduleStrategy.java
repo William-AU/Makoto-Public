@@ -87,7 +87,7 @@ public class ScheduleStrategy {
                         .append("~~");
                 prefix = "\n";
             }
-            BossEntity boss = bossService.getBossFromId(schedule.getPositionBossIdMap().get(i));
+            BossEntity boss = schedule.getPositionBossIdMap().get(i);
             String bossInfo = "";
             if (guild.getBoss().equals(boss) && i < 6) {
                 bossInfo = formatBossField(guild.getCurrentHealth(), boss.getTotalHealth());
@@ -205,6 +205,18 @@ public class ScheduleStrategy {
     }
 
     public void createSchedule(CommandContext ctx) {
+        GuildEntity guild = guildService.getGuild(ctx.getGuildId());
+        // If schedule exists, first delete it from the DB and remove the previous message
+        if (guild.getSchedule() != null) {
+            ScheduleEntity oldSchedule = guild.getSchedule();
+            String oldChannelId = oldSchedule.getChannelId();
+            String oldMessageId = oldSchedule.getMessageId();
+            System.out.println("TRYING TO DELETE MESSAGE WITH ID: " + oldMessageId);
+            ctx.getGuild().getTextChannelById(oldChannelId).deleteMessageById(oldMessageId).queue();
+            scheduleService.deleteSchedule(ctx.getGuildId());
+        }
+
+        // Create new schedule
         scheduleService.createScheduleForGuild(ctx.getGuildId());
         ctx.getChannel().sendMessageEmbeds(createEmbed(ctx.getGuildId(), new HashMap<>() {{put(5, new ArrayList<>(){{add("Test user"); add("user2"); add("user3"); add("user4"); add("user5");}});}},new HashMap<>() {{put(1, new ArrayList<>(){{add("Test user");}});}}))
                 .queue(message -> {
@@ -226,10 +238,11 @@ public class ScheduleStrategy {
     }
 
     public void updateSchedule(JDA jda, String guildId) {
+        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        if (schedule == null) return;
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageEmbedsById(schedule.getMessageId(), createEmbed(guildId, attackers, attacked)).queue();
     }
 
