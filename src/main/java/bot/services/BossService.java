@@ -1,5 +1,6 @@
 package bot.services;
 
+import bot.common.CBUtils;
 import bot.storage.models.BossEntity;
 import bot.storage.models.GuildEntity;
 import bot.storage.repositories.BossRepository;
@@ -32,23 +33,21 @@ public class BossService {
     public void setNextBoss(String guildId) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         BossEntity oldBoss = guild.getBoss();
+
         if (oldBoss == null) {
             initNewBoss(guildId);
             return;
         }
         int oldPos = oldBoss.getPosition();
-        int oldStage = oldBoss.getStage();
-        BossEntity newBoss;
+        int newPos = oldPos + 1;
+        int stage = oldBoss.getStage();
         if (oldPos == 5) {
             int currentLap = guild.getLap();
-            if (currentLap + 1 == 4 || currentLap + 1 == 11) {
-                newBoss = bossRepository.findBossEntityByStageAndPosition(oldStage + 1, 1);
-            }
-            newBoss = bossRepository.findBossEntityByStageAndPosition(oldStage, 1);
+            stage = CBUtils.getStageFromLap(currentLap + 1);
+            guild.setLap(currentLap + 1);
+            newPos = 1;
         }
-        else {
-            newBoss = bossRepository.findBossEntityByStageAndPosition(oldStage, oldPos + 1);
-        }
+        BossEntity newBoss = bossRepository.findBossEntityByStageAndPosition(stage, newPos);
         guild.setBoss(newBoss);
         guild.setCurrentHealth(newBoss.getTotalHealth());
         guildRepository.save(guild);
