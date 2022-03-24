@@ -47,7 +47,7 @@ public interface ScheduleStrategy {
 
     void deleteSchedule(CommandContext ctx);
 
-    void updateSchedule(JDA jda, String guildId);
+    void updateSchedule(JDA jda, String guildId, boolean bossDead);
 
     void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException;
 

@@ -158,12 +158,37 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void updateSchedule(JDA jda, String guildId) {
+    public void updateSchedule(JDA jda, String guildId, boolean bossDead) {
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         if (schedule == null) return;
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
+        // Note that if a boss is dead, we can only query the NEW boss, not the old one
+        if (bossDead) {
+            BossEntity newBoss = guildService.getGuild(guildId).getBoss();
+            if (newBoss.getPosition() == 1) {
+                // This means we are dealing with a new lap
+                // Some weird inner class rules java has? No clue why this is needed tbh
+                Map<Integer, List<String>> finalAttackers = attackers;
+                attackers = new HashMap<>() {{
+                   put(1, finalAttackers.getOrDefault(6, new ArrayList<>()));
+                   put(2, finalAttackers.getOrDefault(7, new ArrayList<>()));
+                   put(3, finalAttackers.getOrDefault(8, new ArrayList<>()));
+                   put(4, finalAttackers.getOrDefault(9, new ArrayList<>()));
+                   put(5, finalAttackers.getOrDefault(10, new ArrayList<>()));
+                }};
+
+                Map<Integer, List<String>> finalAttacked = attacked;
+                attacked = new HashMap<>() {{
+                    put(1, finalAttacked.getOrDefault(6, new ArrayList<>()));
+                    put(2, finalAttacked.getOrDefault(7, new ArrayList<>()));
+                    put(3, finalAttacked.getOrDefault(8, new ArrayList<>()));
+                    put(4, finalAttacked.getOrDefault(9, new ArrayList<>()));
+                    put(5, finalAttacked.getOrDefault(10, new ArrayList<>()));
+                }};
+            }
+        }
         String guildName = jda.getGuildById(guildId).getName();
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
     }

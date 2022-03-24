@@ -230,7 +230,7 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void updateSchedule(JDA jda, String guildId) {
+    public void updateSchedule(JDA jda, String guildId, boolean ignored) {
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         if (schedule == null) return;
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);

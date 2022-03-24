@@ -47,7 +47,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         sheetService.addBattle(guildEntity, userId, damage);
         boolean bossDead = bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId(), bossDead);
-        scheduleStrategy.updateSchedule(jda, guild.getId());
+        scheduleStrategy.updateSchedule(jda, guild.getId(), bossDead);
         updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getEffectiveName());
     }
 
@@ -57,7 +57,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         sheetService.addCarryOver(guildEntity, userId, damage);
         boolean bossDead = bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         trackingStrategy.updateData(jda, guild.getId(), bossDead);
-        scheduleStrategy.updateSchedule(jda, guild.getId());
+        scheduleStrategy.updateSchedule(jda, guild.getId(), bossDead);
         updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getEffectiveName());
     }
 
@@ -68,7 +68,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         // TODO: figure out how to update the damage. Not sure how we can get the previous damage done cleanly,
         //  since that needs to be reverted before this can apply
         trackingStrategy.updateData(jda, guild.getId(), false); // We don't mess with bosses when redoing damage, it's just too messy and it's better to have admins manually fix it
-        scheduleStrategy.updateSchedule(jda, guild.getId());
+        scheduleStrategy.updateSchedule(jda, guild.getId(), false);
     }
 
     /**
