@@ -28,7 +28,6 @@ public class ScheduleEntity {
 
     private String messageId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(nullable = false)
+    @OneToOne(mappedBy = "schedule")
     private GuildEntity guild;
 }

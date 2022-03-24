@@ -36,7 +36,7 @@ public class GuildEntity {
 
     private Integer lap;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ScheduleEntity schedule;
 
     @Enumerated(EnumType.STRING)

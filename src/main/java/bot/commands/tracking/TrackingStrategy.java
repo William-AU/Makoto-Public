@@ -39,10 +39,11 @@ public class TrackingStrategy {
 
     }
 
-    public void updateData(JDA jda, String guildId) {
+    public void updateData(JDA jda, String guildId, boolean bossDead) {
         GuildEntity guild = guildService.getGuild(guildId);
         String channelId = guild.getBossChannelId();
         String messageId = guild.getBossMessageId();
+
         MessageChannel channel = jda.getGuildById(guildId).getTextChannelById(channelId);
         channel.editMessageEmbedsById(messageId, createEmbed(guildId, channel)).queue();
     }

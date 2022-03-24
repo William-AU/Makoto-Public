@@ -80,6 +80,7 @@ public class ScheduleService {
         ScheduleEntity oldSchedule = guild.getSchedule();
         if (oldSchedule == null) return;
         guild.setSchedule(null);
+        guildRepository.save(guild);
         scheduleRepository.delete(oldSchedule);
     }
 }

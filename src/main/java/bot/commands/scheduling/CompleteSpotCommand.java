@@ -2,7 +2,6 @@ package bot.commands.scheduling;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
-import bot.exceptions.MemberAlreadyExistsException;
 import bot.exceptions.MemberHasAlreadyAttackedException;
 import bot.exceptions.MemberIsNotAttackingException;
 import bot.services.GuildService;

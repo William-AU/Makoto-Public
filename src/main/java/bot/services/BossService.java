@@ -53,7 +53,13 @@ public class BossService {
         guildRepository.save(guild);
     }
 
-    public void takeDamage(String guildId, int damage) {
+    /**
+     * Handles the effects of an attack, setting a new boss if possible, returns true if the boss is killed
+     * @param guildId ID of the guild
+     * @param damage The damage of the attack (without score bonuses)
+     * @return true if the boss was killed, false otherwise
+     */
+    public boolean takeDamage(String guildId, int damage) {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         int oldHealth = guild.getCurrentHealth();
         if (oldHealth - damage < 1) {
@@ -64,11 +70,14 @@ public class BossService {
             // but this should work for now
             guild = guildRepository.getGuildEntityByGuildId(guildId);
             guild.setCurrentHealth(guild.getCurrentHealth() - carryOver);
+            guildRepository.save(guild);
+            return true;
         }
         else {
             guild.setCurrentHealth(oldHealth - damage);
+            guildRepository.save(guild);
+            return false;
         }
-        guildRepository.save(guild);
     }
 
     /**
