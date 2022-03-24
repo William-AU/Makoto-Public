@@ -69,7 +69,8 @@ public class BossService {
             // There is a way to get a reference to an object instead of just the object (think it's get vs find)
             // but this should work for now
             guild = guildRepository.getGuildEntityByGuildId(guildId);
-            guild.setCurrentHealth(guild.getCurrentHealth() - carryOver);
+            //guild.setCurrentHealth(guild.getCurrentHealth() - carryOver); // We remove this for now, since there are some shenanigans where overkilling doesn't actually mean a carryover - this is some CR nonsense...
+            guild.setCurrentHealth(guild.getCurrentHealth());
             guildRepository.save(guild);
             return true;
         }
