@@ -96,7 +96,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     private final String SCHEDULING_CATEGORY_NAME = "makoto-scheduling";
     private final String SCHEDULING_CHANNEL_NAME = "schedule";
     private boolean hasScheduleChannels(CommandContext ctx) {
-        // TODO: Remove, only for testing
+        /*
         System.out.println("CHECKING IF SCHEDULES EXIST");
         List<Category> categories = ctx.getGuild().getCategoriesByName(SCHEDULING_CATEGORY_NAME, true);
         System.out.println(categories.size());
@@ -107,6 +107,8 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
             }
             categories.get(0).delete().reason("test").queue();
         }
+
+         */
 
         List<TextChannel> channels = ctx.getGuild().getTextChannels();
         List<String> neededChannels = new ArrayList<>() {{
