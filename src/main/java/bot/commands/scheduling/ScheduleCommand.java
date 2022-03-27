@@ -2,6 +2,7 @@ package bot.commands.scheduling;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
+import bot.exceptions.ScheduleException;
 import bot.utils.PermissionsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +26,15 @@ public class ScheduleCommand implements ICommand {
             return;
         }
         if (scheduleStrategy.hasActiveSchedule(ctx.getGuildId())) {
-            ctx.sendError("A schedule is already tracking this boss, use `!resetschedule <Boss position>` or `!removeschedule <Boss position>`");
+            ctx.sendError("A schedule is already tracking this boss, use `!resetschedule`");
             return;
         }
-        scheduleStrategy.createSchedule(ctx);
-        ctx.reactPositive();
+        try {
+            scheduleStrategy.createSchedule(ctx);
+            ctx.reactPositive();
+        } catch (ScheduleException e) {
+            ctx.sendError("Scheduling requires that the bot has permission to manage text channels in order to create the needed coordination channels");
+        }
     }
 
 

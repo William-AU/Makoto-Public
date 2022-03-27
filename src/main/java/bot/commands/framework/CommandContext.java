@@ -33,6 +33,7 @@ public class CommandContext implements ICommandContext{
     }
 
     public void reactPositive() {
+        if (getMessage() == null) return;       // In case we are dealing with a button
         getMessage().addReaction(BotConstants.REACT_POSITIVE).queue();
     }
 

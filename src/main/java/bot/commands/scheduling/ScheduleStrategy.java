@@ -1,10 +1,7 @@
 package bot.commands.scheduling;
 
 import bot.commands.framework.CommandContext;
-import bot.exceptions.MemberAlreadyExistsException;
-import bot.exceptions.MemberHasAlreadyAttackedException;
-import bot.exceptions.MemberHasNotAttackedException;
-import bot.exceptions.MemberIsNotAttackingException;
+import bot.exceptions.*;
 import net.dv8tion.jda.api.JDA;
 
 import java.util.List;
@@ -43,7 +40,7 @@ public interface ScheduleStrategy {
      * Creates a new schedule, this will remove any previous schedule WITHOUT WARNING
      * @param ctx The context of the command call
      */
-    void createSchedule(CommandContext ctx);
+    void createSchedule(CommandContext ctx) throws ScheduleException;
 
     void deleteSchedule(CommandContext ctx);
 

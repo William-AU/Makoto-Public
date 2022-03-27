@@ -2,9 +2,6 @@ GENERAL
     Fix the need to use !startcb before !addbattle commands work
 
 SCHEDULE
-    Make sure schedules correctly update when a lap is finished
     Add the ability to override current the current active boss until damage has caught up
     Display the correct boss names ;_;
-
-FINISHED
-    Display current lap correctly
+    BUG: Adding a battle that kills a boss does not mark the user as having completed an attack

@@ -2,6 +2,7 @@ package bot.commands.scheduling;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
+import bot.exceptions.ScheduleException;
 import bot.utils.PermissionsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,12 @@ public class ResetScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        scheduleStrategy.createSchedule(ctx);
+        try {
+            // This shouldn't actually throw anything, because this exception would have been thrown when the schedule was originally created
+            scheduleStrategy.createSchedule(ctx);
+        } catch (ScheduleException e) {
+            e.printStackTrace();
+        }
         ctx.reactPositive();
     }
 

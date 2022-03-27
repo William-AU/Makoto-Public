@@ -5,11 +5,11 @@ import bot.commands.battles.strategies.DamageBasedPictureStrategy;
 import bot.commands.battles.strategies.DamageStrategy;
 import bot.commands.battles.strategies.PictureStrategy;
 import bot.commands.framework.ICommand;
-import bot.commands.scheduling.EmbedScheduleStrategy;
 import bot.commands.scheduling.MessageScheduleStrategy;
 import bot.commands.scheduling.ScheduleStrategy;
 import bot.commands.tracking.TrackingStrategy;
 import bot.listeners.CommandListener;
+import bot.listeners.ScheduleButtonListener;
 import bot.services.BossService;
 import bot.services.GuildService;
 import bot.services.ScheduleService;
@@ -17,7 +17,6 @@ import bot.services.SheetService;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -42,13 +41,15 @@ public class BotConfig {
     private final SheetService sheetService;
     private final BossService bossService;
     private final TrackingStrategy trackingStrategy;
+    private final ScheduleService scheduleService;
 
     @Autowired
-    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy) {
+    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, ScheduleService scheduleService) {
         this.guildService = guildService;
         this.sheetService = sheetService;
         this.bossService = bossService;
         this.trackingStrategy = trackingStrategy;
+        this.scheduleService = scheduleService;
     }
 
     @Bean
@@ -79,6 +80,7 @@ public class BotConfig {
 
 
         jdaBuilder.addEventListeners(new CommandListener(commands));
+        jdaBuilder.addEventListeners(new ScheduleButtonListener(scheduleStrategy(scheduleService, guildService, bossService), guildService));
 
         return jdaBuilder.build();
     }
@@ -96,7 +98,6 @@ public class BotConfig {
     }
 
     @Bean
-    @Autowired
     public ScheduleStrategy scheduleStrategy(ScheduleService scheduleService, GuildService guildService, BossService bossService) {
         return new MessageScheduleStrategy(scheduleService, guildService, bossService);
     }
