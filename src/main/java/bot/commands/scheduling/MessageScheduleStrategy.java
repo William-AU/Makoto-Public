@@ -72,7 +72,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                     for (String user : rawUsers) {
                         // Remove the "~~" at the start and end of user
                         if (!user.trim().equals("")) {
-                            String newUser = user.substring(2, user.length() - 3);
+                            String newUser = user.substring(2, user.length() - 2);
                             attacked.add(newUser);
                         }
                     }

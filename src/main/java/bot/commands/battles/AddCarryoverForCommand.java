@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +36,6 @@ public class AddCarryoverForCommand implements ICommand {
 
     @Override
     public List<String> getIdentifiers() {
-        return Collections.singletonList("addcarryoverfor");
+        return Arrays.asList("addcarryoverfor", "carryoverfor");
     }
 }

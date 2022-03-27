@@ -6,6 +6,7 @@ import bot.commands.framework.ICommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +28,6 @@ public class AddCarryoverCommand implements ICommand {
 
     @Override
     public List<String> getIdentifiers() {
-        return Collections.singletonList("addcarryover");
+        return Arrays.asList("addcarryover", "carryover");
     }
 }
