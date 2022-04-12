@@ -12,7 +12,6 @@ import bot.storage.models.ScheduleEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -89,6 +88,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         }
         result.put(ATTACKING, attackingBossMap);
         result.put(ATTACKED, attackedBossMap);
+        System.out.println("RETURNING MAP: " + result);
         return result;
     }
 
@@ -157,7 +157,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                         // NOTE: THIS MEANS WE IMPLICITLY ENFORCE A NAMING SCHEME OF TEXT CHANNELS IN THE CATEGORY
                         System.out.println("Trying to split: " + channel.getName());
                         int bossPosition = Integer.parseInt(channel.getName().split("_")[1]);
-                        List<MessageEmbed> bossEmbeds = createBossEmbed(ctx.getJDA(), ctx.getGuildId(), bossPosition);
+                        List<MessageEmbed> bossEmbeds = createBossEmbed(ctx.getJDA(), ctx.getGuildId(), bossPosition, true);
                         channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(ctx.getGuildId(), bossPosition)).queue(ignored2 -> {
                             channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(ctx.getGuildId(), bossPosition + 5)).queue();
                         });
@@ -221,16 +221,58 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
     /**
      * Creates two embeds for the given boss, first for the current lap, second for the next lap
-     * @param ctx command context for the original schedule call
-     * @param bosPosition the position of the boss
+     * @param bossPosition the position of the boss
      * @return a list of size 2 containing the two embeds
      */
-    private List<MessageEmbed> createBossEmbed(JDA jda, String guildId, int bosPosition) {
+    private List<MessageEmbed> createBossEmbed(JDA jda, String guildId, int bossPosition, boolean isSetup) {
+        // Yes yes, flags in params is a no no, but this works...
+        if (isSetup) {
+            // WE ARE COPY PASTING NOW
+            EmbedBuilder eb1 = new EmbedBuilder();
+            int currentLap = guildService.getGuild(guildId).getLap();
+            eb1.setTitle("Lap: " + currentLap);
+            EmbedBuilder eb2 = new EmbedBuilder();
+            eb2.setTitle("Lap: " + (currentLap + 1));
+            return new ArrayList<>() {{
+                add(eb1.build());
+                add(eb2.build());
+            }};
+        }
+        if (bossPosition > 5) {
+            bossPosition -= 5;
+        }
+
+        Map<String, Map<Integer, List<String>>> memberMap = extractMembers(jda, guildId);
         EmbedBuilder eb1 = new EmbedBuilder();
-        eb1.setTitle("Current lap");
+        int currentLap = guildService.getGuild(guildId).getLap();
+        eb1.setTitle("Lap: " + currentLap);
+        List<String> attackingCurrentLap = memberMap.get(ATTACKING).getOrDefault(bossPosition, new ArrayList<>());
+        List<String> attackedCurrentLap = memberMap.get(ATTACKED).getOrDefault(bossPosition, new ArrayList<>());
+        StringBuilder attacking = new StringBuilder();
+        String prefix = "";
+        for (String member : attackingCurrentLap) {
+            attacking.append(prefix).append(member);
+            prefix = ", ";
+        }
+        StringBuilder attacked = new StringBuilder();
+        prefix = "";
+        for (String member: attackedCurrentLap) {
+            attacked.append(prefix).append(member);
+        }
+        eb1.addField("Attacking", attacking.toString(), false);
+        eb1.addField("Attacked", attacked.toString(), false);
 
         EmbedBuilder eb2 = new EmbedBuilder();
-        eb2.setTitle("Next lap");
+        System.out.println("GETTING FOR " + (bossPosition + 5) + " WITH bossPosition=" + bossPosition);
+        List<String> attackingNextLap = memberMap.get(ATTACKING).getOrDefault(bossPosition + 5, new ArrayList<>());
+        // There cannot be any attacked next lap because the boss isn't attackable yet!
+        eb2.setTitle("Lap: " + (currentLap + 1));
+        attacking = new StringBuilder();
+        prefix = "";
+        for (String member : attackingNextLap) {
+            attacking.append(prefix).append(member);
+        }
+        eb2.addField("Planning to attack", attacking.toString(), false);
 
         return new ArrayList<>() {{
             add(eb1.build());
@@ -340,11 +382,11 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                                 .retrievePast(2)
                                 .map(messages -> messages.get(1))
                                 .queue(message -> message.delete().queue(ignored -> channel
-                                        .sendMessageEmbeds(createBossEmbed(jda, guildId, finalBossPos).get(1))
+                                        .sendMessageEmbeds(createBossEmbed(jda, guildId, finalBossPos, false).get(1))
                                         .setActionRow(createBossButtons(guildId, finalBossPos + 5))
                                         .queue()));
                     } else {
-                        channel.sendMessageEmbeds(createBossEmbed(jda, guildId, finalBossPos).get(1))
+                        channel.sendMessageEmbeds(createBossEmbed(jda, guildId, finalBossPos, false).get(1))
                                 .setActionRow(createBossButtons(guildId, finalBossPos + 5))
                                 .queue();
                     }
@@ -407,6 +449,21 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         String guildName = jda.getGuildById(guildId).getName();
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
+        int firstPos = position;
+        if (position > 5) {
+            firstPos -= 5;
+        }
+        TextChannel channel = jda.getGuildById(guildId).getCategoriesByName(SCHEDULING_CATEGORY_NAME, true)
+                .get(0)
+                .getTextChannels()
+                .get(firstPos);
+        channel.getHistory().retrievePast(2).queue(messages -> {
+            messages.get(0).delete().queue();
+            messages.get(1).delete().queue();
+        });
+        channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(guildId, firstPos)).queue();
+        channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(guildId, firstPos + 5)).queue();
     }
 
     @Override
@@ -420,6 +477,21 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attacked.get(position).remove(name);
         String guildName = jda.getGuildById(guildId).getName();
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
+        int firstPos = position;
+        if (position > 5) {
+            firstPos -= 5;
+        }
+        TextChannel channel = jda.getGuildById(guildId).getCategoriesByName(SCHEDULING_CATEGORY_NAME, true)
+                .get(0)
+                .getTextChannels()
+                .get(firstPos);
+        channel.getHistory().retrievePast(2).queue(messages -> {
+            messages.get(0).delete().queue();
+            messages.get(1).delete().queue();
+        });
+        channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(guildId, firstPos)).queue();
+        channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(guildId, firstPos + 5)).queue();
     }
 
     @Override
@@ -434,6 +506,21 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attacked.get(position).add(name);
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
+        int firstPos = position;
+        if (position > 5) {
+            firstPos -= 5;
+        }
+        TextChannel channel = jda.getGuildById(guildId).getCategoriesByName(SCHEDULING_CATEGORY_NAME, true)
+                .get(0)
+                .getTextChannels()
+                .get(firstPos);
+        channel.getHistory().retrievePast(2).queue(messages -> {
+            messages.get(0).delete().queue();
+            messages.get(1).delete().queue();
+        });
+        channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(guildId, firstPos)).queue();
+        channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(guildId, firstPos + 5)).queue();
     }
 
     @Override
@@ -447,6 +534,21 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attackers.get(position).add(name);
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
+        int firstPos = position;
+        if (position > 5) {
+            firstPos -= 5;
+        }
+        TextChannel channel = jda.getGuildById(guildId).getCategoriesByName(SCHEDULING_CATEGORY_NAME, true)
+                .get(0)
+                .getTextChannels()
+                .get(firstPos);
+        channel.getHistory().retrievePast(2).queue(messages -> {
+            messages.get(0).delete().queue();
+            messages.get(1).delete().queue();
+        });
+        channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(guildId, firstPos)).queue();
+        channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(guildId, firstPos + 5)).queue();
     }
 
     @Override
