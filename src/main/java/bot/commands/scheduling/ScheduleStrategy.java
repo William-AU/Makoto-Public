@@ -75,7 +75,7 @@ public interface ScheduleStrategy {
      */
     default String parseName(CommandContext ctx) throws Exception {
         String[] content = ctx.getMessage().getContentRaw().split(" ");
-        if (!content[1].contains("<@!")) {
+        if (!content[1].contains("<@")) {
             throw new Exception("User must be a mention");
         }
         try {
