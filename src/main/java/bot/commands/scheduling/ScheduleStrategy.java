@@ -79,7 +79,7 @@ public interface ScheduleStrategy {
             throw new Exception("User must be a mention");
         }
         try {
-            String id = content[1].substring(3, content[1].length() - 1);
+            String id = content[1].substring(2, content[1].length() - 1);
             Long.parseLong(id);
             return ctx.getGuild().getMemberById(id).getEffectiveName();
         } catch (NumberFormatException e) {
