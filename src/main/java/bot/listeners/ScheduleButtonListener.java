@@ -8,6 +8,7 @@ import bot.exceptions.MemberHasNotAttackedException;
 import bot.exceptions.MemberIsNotAttackingException;
 import bot.services.GuildService;
 import lombok.SneakyThrows;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,7 +27,7 @@ public class ScheduleButtonListener extends ListenerAdapter {
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         System.out.println("NAME: " + event.getUser().getName());
-        User user = event.getUser();
+        Member member = event.getMember();
         Button button = event.getButton();
         String buttonId = button.getId();
         String[] buttonInfo = buttonId.split("-"); // Array should be of size 4 with the following info: ScheduleButtonType, guildID, bossPosition, bossLap
@@ -43,16 +44,16 @@ public class ScheduleButtonListener extends ListenerAdapter {
         try {
             switch (type) {
                 case JOIN -> {
-                    scheduleStrategy.addAttacker(event.getJDA(), guildId, bossPosition, user.getName());
+                    scheduleStrategy.addAttacker(event.getJDA(), guildId, bossPosition, member.getNickname());
                 }
                 case LEAVE -> {
-                    scheduleStrategy.removeAttacker(event.getJDA(), guildId, bossPosition, user.getName());
+                    scheduleStrategy.removeAttacker(event.getJDA(), guildId, bossPosition, member.getNickname());
                 }
                 case COMPLETE -> {
-                    scheduleStrategy.markFinished(event.getJDA(), guildId, bossPosition, user.getName());
+                    scheduleStrategy.markFinished(event.getJDA(), guildId, bossPosition, member.getNickname());
                 }
                 case UNCOMPLETE -> {
-                    scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, user.getName());
+                    scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, member.getNickname());
                 }
             }
             event.reply("Success!").setEphemeral(true).queue();
