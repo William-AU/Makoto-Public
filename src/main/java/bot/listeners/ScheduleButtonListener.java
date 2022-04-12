@@ -25,6 +25,7 @@ public class ScheduleButtonListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        System.out.println("NAME: " + event.getUser().getName());
         User user = event.getUser();
         Button button = event.getButton();
         String buttonId = button.getId();

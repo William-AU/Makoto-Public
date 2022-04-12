@@ -448,7 +448,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         Map<Integer, List<String>> attacked = allMembers.get("attacked");
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         String guildName = jda.getGuildById(guildId).getName();
-        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
         int firstPos = position;
         if (position > 5) {
@@ -462,6 +462,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
             messages.get(0).delete().queue();
             messages.get(1).delete().queue();
         });
+
         channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(guildId, firstPos)).queue();
         channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(guildId, firstPos + 5)).queue();
     }
@@ -476,7 +477,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attackers.get(position).remove(name);
         attacked.get(position).remove(name);
         String guildName = jda.getGuildById(guildId).getName();
-        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
         int firstPos = position;
         if (position > 5) {
@@ -505,7 +506,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attackers.get(position).remove(name);
         attacked.get(position).add(name);
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
-        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
         int firstPos = position;
         if (position > 5) {
@@ -533,7 +534,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attacked.get(position).remove(name);
         attackers.get(position).add(name);
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
-        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
         int firstPos = position;
         if (position > 5) {
