@@ -319,11 +319,27 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 sb.append("\n");
                 sb.append("__**Lap ").append(currentLap + 1).append("**__").append("\n");
             }
+            // START OF TITLE
             if (i == currentBoss.getPosition()) {
-                sb.append("**").append(bossMap.get(i).getName()).append(" current boss: (").append(guild.getCurrentHealth()).append("/").append(currentBoss.getTotalHealth()).append(")").append("**").append("\n");
+                sb.append("**").append(bossMap.get(i).getName()).append(" current boss: (").append(guild.getCurrentHealth()).append("/").append(currentBoss.getTotalHealth()).append(")");
             } else {
-                sb.append("**").append(bossMap.get(i).getName()).append("**").append("\n");
+                sb.append("**").append(bossMap.get(i).getName());
             }
+
+            int lapToGet = currentLap;
+            if (i > 5) {
+                lapToGet++;
+            }
+            Optional<Integer> expectedAttacks = scheduleService.getExpectedAttacksForBoss(guildId, bossMap.get(i).getPosition(), lapToGet);
+            String expectedString = "?";
+            if (expectedAttacks.isPresent()) {
+                expectedString = expectedAttacks.get() + "";
+            }
+            int noOfAttackers = positionAttackingMap.getOrDefault(i, new ArrayList<>()).size();
+            sb.append(" (").append(noOfAttackers).append("/").append(expectedString).append(")").append("**").append("\n");
+            // END OF TITLE
+
+            // START OF PLAYER LIST
             String prefix = "";
             // Get attackers for current boss
             for (String attacker : positionAttackingMap.getOrDefault(i, new ArrayList<>())) {

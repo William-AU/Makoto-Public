@@ -10,10 +10,7 @@ import bot.storage.repositories.ScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ScheduleService {
@@ -69,9 +66,32 @@ public class ScheduleService {
         schedule.setGuild(guild);
         schedule.setCurrentLap(guild.getLap());
         schedule.setPositionBossIdMap(positionIdMap);
+        // For some reason JPA cannot save empty maps, so we have to initialize it with something...
+        schedule.setExpectedAttacksMap(new HashMap<>() {{
+            put(-1, -1);
+        }});
         scheduleRepository.save(schedule);
         guild.setSchedule(schedule);
         guildRepository.save(guild);
+    }
+
+    public void setExpectedAttacks(String guildId, int bossPosition, int lap, int expectedAttacks) {
+        ScheduleEntity schedule = getScheduleByGuildId(guildId);
+        int currentLap = schedule.getCurrentLap();
+        if (lap > currentLap) bossPosition += 5;
+        Map<Integer, Integer> oldMap = schedule.getExpectedAttacksMap();
+        oldMap.put(bossPosition, expectedAttacks);
+        schedule.setExpectedAttacksMap(oldMap);
+        scheduleRepository.save(schedule);
+    }
+
+    public Optional<Integer> getExpectedAttacksForBoss(String guildId, int bossPosition, int lap) {
+        ScheduleEntity schedule = getScheduleByGuildId(guildId);
+        int currentLap = schedule.getCurrentLap();
+        if (lap > currentLap) bossPosition += 5;
+        Integer result = schedule.getExpectedAttacksMap().get(bossPosition);
+        if (result == null) return Optional.empty();
+        return Optional.of(result);
     }
 
 

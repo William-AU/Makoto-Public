@@ -22,7 +22,8 @@ public class ScheduleEntity {
     // BossEntity should probably be used here, but having it map correctly is a complete nightmare
     private Map<Integer, BossEntity> positionBossIdMap;
 
-    private Integer expectedAttacks;
+    @ElementCollection
+    private Map<Integer, Integer> expectedAttacksMap;
 
     private String channelId;
 

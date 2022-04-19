@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +41,7 @@ public class ScheduleButtonListener extends ListenerAdapter {
         if (lap > currentLap) {
             bossPosition += 5;
         }
+        InteractionHook hook = event.deferReply().complete();
 
         try {
             switch (type) {
@@ -56,7 +58,8 @@ public class ScheduleButtonListener extends ListenerAdapter {
                     scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, member.getNickname());
                 }
             }
-            event.reply("Success!").setEphemeral(true).queue();
+            //hook.editOriginal("Success!").queue();
+            //event.reply("Success!").setEphemeral(true).queue();
         } catch (MemberAlreadyExistsException e) {
             sendError(event, "Cannot join, already attacking");
         } catch (MemberHasAlreadyAttackedException e) {
