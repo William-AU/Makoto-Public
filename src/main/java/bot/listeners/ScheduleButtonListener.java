@@ -41,7 +41,7 @@ public class ScheduleButtonListener extends ListenerAdapter {
         if (lap > currentLap) {
             bossPosition += 5;
         }
-        InteractionHook hook = event.deferReply().complete();
+        InteractionHook hook = event.deferReply(true).complete();
 
         try {
             switch (type) {
@@ -58,7 +58,7 @@ public class ScheduleButtonListener extends ListenerAdapter {
                     scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, member.getNickname());
                 }
             }
-            //hook.editOriginal("Success!").queue();
+            hook.editOriginal("Success!").queue();
             //event.reply("Success!").setEphemeral(true).queue();
         } catch (MemberAlreadyExistsException e) {
             sendError(event, "Cannot join, already attacking");
