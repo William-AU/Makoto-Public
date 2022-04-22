@@ -73,6 +73,7 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
         guild.setSchedule(schedule);
         guildRepository.save(guild);
+        System.out.println("FINISHED CREATING SCHEDULE");
     }
 
     public void setExpectedAttacks(String guildId, int bossPosition, int lap, int expectedAttacks) {

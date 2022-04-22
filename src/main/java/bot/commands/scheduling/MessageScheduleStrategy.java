@@ -12,9 +12,7 @@ import bot.storage.models.ScheduleEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.*;
@@ -26,6 +24,10 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
     private final String ATTACKING = "attacking";
     private final String ATTACKED = "attacked";
+
+    // Define this as a constant to avoid typos and to allow renaming the category name
+    private final String SCHEDULING_CATEGORY_NAME = "makoto-scheduling";
+    private final String SCHEDULING_CHANNEL_NAME = "schedule";
 
     public MessageScheduleStrategy(ScheduleService scheduleService, GuildService guildService, BossService bossService) {
         this.scheduleService = scheduleService;
@@ -92,25 +94,10 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         return result;
     }
 
-    // Define this as a constant to avoid typos and to allow renaming the category name
-    private final String SCHEDULING_CATEGORY_NAME = "makoto-scheduling";
-    private final String SCHEDULING_CHANNEL_NAME = "schedule";
+
     private boolean hasScheduleChannels(CommandContext ctx) {
-        /*
-        System.out.println("CHECKING IF SCHEDULES EXIST");
-        List<Category> categories = ctx.getGuild().getCategoriesByName(SCHEDULING_CATEGORY_NAME, true);
-        System.out.println(categories.size());
-        if (categories.size() == 1) {
-            System.out.println("DELETING CATEGORY");
-            for (TextChannel channel : categories.get(0).getTextChannels()) {
-                channel.delete().reason("Test").queue();
-            }
-            categories.get(0).delete().reason("test").queue();
-        }
-
-         */
-
         List<TextChannel> channels = ctx.getGuild().getTextChannels();
+        System.out.println("EXISTING CHANNELS: " + channels);
         List<String> neededChannels = new ArrayList<>() {{
             // The channels that are expected to exist, note that these should not be changed unless absolutely necessary since it will mess up peoples channels
             add(SCHEDULING_CHANNEL_NAME);
@@ -124,6 +111,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         for (TextChannel channel : channels) {
             foundChannels.add(channel.getName());
         }
+        System.out.println("FOUND CHANNELS: " + foundChannels);
         return foundChannels.containsAll(neededChannels);
     }
 
@@ -284,22 +272,29 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     @Override
     public void createSchedule(CommandContext ctx) throws ScheduleException {
         GuildEntity guild = guildService.getGuild(ctx.getGuildId());
-
+        boolean hasDeletedChannels = false;
         // Delete old schedule if it exists
         if (guild.getSchedule() != null) {
-            ScheduleEntity oldSchedule = guild.getSchedule();
-            String oldChannelID = oldSchedule.getChannelId();
-            String oldMessageID = oldSchedule.getMessageId();
-            if (oldChannelID != null && oldMessageID != null) {
-                ctx.getGuild().getTextChannelById(oldChannelID).deleteMessageById(oldMessageID).queue();
-            }
             scheduleService.deleteSchedule(ctx.getGuildId());
+            // Check if channels exist
+            List<Category> categories = ctx.getGuild().getCategoriesByName(SCHEDULING_CATEGORY_NAME, true);
+            if (categories.size() > 0) {
+                Category category = categories.get(0);
+                for (GuildChannel channel : category.getChannels()) {
+                    channel.delete().complete();
+                }
+                category.delete().complete();
+                System.out.println("FINISHED DELETING CHANNELS");
+                hasDeletedChannels = true;
+            }
         }
-
         // Create new schedule
+        System.out.println("CREATING SCHEDULE");
         scheduleService.createScheduleForGuild(ctx.getGuildId());
 
-        if (!hasScheduleChannels(ctx)) {
+        System.out.println("CHECKING IF CHANNELS EXIST");
+        if (hasDeletedChannels || !hasScheduleChannels(ctx)) {
+            System.out.println("CHANNELS DO NOT EXIST, CREATING");
             // If this throws an exception, we completely exit the method and rely on parent to do error handling
             createScheduleChannels(ctx);
         }
