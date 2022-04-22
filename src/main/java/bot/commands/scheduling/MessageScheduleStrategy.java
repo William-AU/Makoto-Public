@@ -447,7 +447,8 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
             }
         }
         String guildName = jda.getGuildById(guildId).getName();
-        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).queue();
+        // Note, we have to use complete here, or we risk race conditions because this is NOT stateless!
+        jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
     }
 
     @Override
