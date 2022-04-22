@@ -66,4 +66,10 @@ public class GuildService {
         guild.setImagePreference(preference);
         guildRepository.save(guild);
     }
+
+    public void setCurrentBossHealth(String guildId, int newHealth) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        guild.setCurrentHealth(newHealth);
+        guildRepository.save(guild);
+    }
 }
