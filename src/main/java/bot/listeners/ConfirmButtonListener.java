@@ -29,7 +29,7 @@ public class ConfirmButtonListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        ReplyCallbackAction reply = event.deferReply(true);
+        event.deferReply(true).queue();
         Button button = event.getButton();
         String buttonId = button.getId();
         String[] split = buttonId.split("-");
@@ -38,10 +38,9 @@ public class ConfirmButtonListener extends ListenerAdapter {
         switch (type) {
             case ABORT -> {
                 event.getMessage().delete().queue();
-                reply.setContent("Aborted").complete();
+                event.getHook().sendMessage("Aborted").queue();
             }
             case CONFIRM -> {
-                reply.setContent("Successfully deleted message");
                 guildService.setLap(event.getGuild().getId(), Integer.parseInt(split[2]));
                 // This could be one call, instead of two
                 bossService.resetBossHP(event.getGuild().getId());
@@ -53,7 +52,7 @@ public class ConfirmButtonListener extends ListenerAdapter {
                     e.printStackTrace();
                 }
                 event.getMessage().delete().queue();
-                reply.complete();
+                event.getHook().sendMessage("Successfully changed lap").queue();
             }
         }
     }
