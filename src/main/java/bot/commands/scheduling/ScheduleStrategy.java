@@ -46,7 +46,7 @@ public interface ScheduleStrategy {
 
     void updateSchedule(JDA jda, String guildId, boolean bossDead);
 
-    void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException;
+    void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException;
 
     void removeAttacker(JDA jda, String guildId, Integer position, String name) throws MemberIsNotAttackingException;
 

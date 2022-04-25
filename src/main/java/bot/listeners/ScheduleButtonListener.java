@@ -61,17 +61,17 @@ public class ScheduleButtonListener extends ListenerAdapter {
             hook.editOriginal("Success!").queue();
             //event.reply("Success!").setEphemeral(true).queue();
         } catch (MemberAlreadyExistsException e) {
-            sendError(event, "Cannot join, already attacking");
+            sendError(hook, "Cannot join, already attacking");
         } catch (MemberHasAlreadyAttackedException e) {
-            sendError(event, "You have already attacked this boss, the bot currently does not support multiple attacks on the same boss, sorry!");
+            sendError(hook, "You have already attacked this boss, the bot currently does not support multiple attacks on the same boss, sorry!");
         } catch (MemberHasNotAttackedException e) {
-            sendError(event, "You have already completed your attack, the bot currently does not support multiple attacks on the same boss, sorry!");
+            sendError(hook, "You have already completed your attack, the bot currently does not support multiple attacks on the same boss, sorry!");
         } catch (MemberIsNotAttackingException e) {
-            sendError(event, "You are not attacking the current boss");
+            sendError(hook, "You are not attacking the current boss");
         }
     }
 
-    private void sendError(ButtonInteractionEvent event, String message) {
-        event.reply(message).setEphemeral(true).queue();
+    private void sendError(InteractionHook hook, String message) {
+        hook.editOriginal(message).queue();
     }
 }

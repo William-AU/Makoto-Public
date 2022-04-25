@@ -452,12 +452,13 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException {
+    public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         if (attackers.get(position).contains(name)) throw new MemberAlreadyExistsException();
         attackers.get(position).add(name);
         Map<Integer, List<String>> attacked = allMembers.get("attacked");
+        if (attacked.get(position).contains(name)) throw new MemberHasAlreadyAttackedException();
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         String guildName = jda.getGuildById(guildId).getName();
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();

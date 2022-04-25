@@ -37,7 +37,7 @@ public class ScheduleCommand implements ICommand {
             ctx.reactPositive();
         } catch (ScheduleException e) {
             ctx.sendError("Scheduling requires that the bot has permission to manage text channels in order to create the needed coordination channels");
-        } catch (NullPointerException startCBNotInitializedException) {
+        } catch (NullPointerException startCBNotInitialized) {
             startCBCommand.handle(ctx);
             try {
                 scheduleStrategy.createSchedule(ctx);
