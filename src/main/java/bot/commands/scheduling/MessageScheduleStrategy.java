@@ -326,6 +326,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 lapToGet++;
             }
             Optional<Integer> expectedAttacks = scheduleService.getExpectedAttacksForBoss(guildId, bossMap.get(i).getPosition(), lapToGet);
+            System.out.println("LOOKING FOR EXPECTED ATTACKS, FOUND: " + expectedAttacks);
             String expectedString = "?";
             if (expectedAttacks.isPresent()) {
                 expectedString = expectedAttacks.get() + "";
