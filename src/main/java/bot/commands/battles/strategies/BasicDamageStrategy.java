@@ -46,7 +46,11 @@ public class BasicDamageStrategy implements DamageStrategy {
         boolean bossDead = bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
         //trackingStrategy.updateData(jda, guild.getId(), bossDead);
         scheduleStrategy.updateSchedule(jda, guild.getId(), bossDead);
-        updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getNickname());
+        String name = guild.getMemberById(userId).getNickname();
+        if (name == null) {
+            name = guild.getMemberById(userId).getEffectiveName();
+        }
+        updateSchedule(jda, guild.getId(), name);
     }
 
     @Override

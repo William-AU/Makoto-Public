@@ -82,7 +82,9 @@ public interface ScheduleStrategy {
         try {
             String id = content[1].substring(2, content[1].length() - 1);
             Long.parseLong(id);
-            return ctx.getGuild().getMemberById(id).getNickname();
+            String name = ctx.getGuild().getMemberById(id).getNickname();
+            if (name != null) return name;
+            return ctx.getGuild().getMemberById(id).getEffectiveName();
         } catch (NumberFormatException e) {
             throw new Exception("User must be a mention");
         }

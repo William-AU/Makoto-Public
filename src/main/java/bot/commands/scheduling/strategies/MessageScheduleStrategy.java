@@ -123,6 +123,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
             ctx.getGuild().createCategory(SCHEDULING_CATEGORY_NAME)
                     // Very messy permissions override, this seems to be the easiest way to make the channel effectively read only, note that all text channels inherit from the category
                     .addPermissionOverride(ctx.getGuild().getPublicRole(), EnumSet.of(Permission.VIEW_CHANNEL), EnumSet.of(Permission.MESSAGE_SEND))
+                    // TODO: Fix hard coded bot id
                     .addPermissionOverride(ctx.getGuild().getRoleByBot("811219718584270868"), EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND), null).queue(category -> {
                 // Potential for a lot of race conditions here if we start working on these channels before they are actually created
                 category.createTextChannel("schedule").queue();

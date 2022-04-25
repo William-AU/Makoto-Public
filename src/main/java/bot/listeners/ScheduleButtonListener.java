@@ -48,18 +48,22 @@ public class ScheduleButtonListener extends ListenerAdapter {
         InteractionHook hook = event.deferReply(true).complete();
 
         try {
+            String name = member.getNickname();
+            if (name == null) {
+                name = member.getEffectiveName();
+            }
             switch (type) {
                 case JOIN -> {
-                    scheduleStrategy.addAttacker(event.getJDA(), guildId, bossPosition, member.getNickname());
+                    scheduleStrategy.addAttacker(event.getJDA(), guildId, bossPosition, name);
                 }
                 case LEAVE -> {
-                    scheduleStrategy.removeAttacker(event.getJDA(), guildId, bossPosition, member.getNickname());
+                    scheduleStrategy.removeAttacker(event.getJDA(), guildId, bossPosition, name);
                 }
                 case COMPLETE -> {
-                    scheduleStrategy.markFinished(event.getJDA(), guildId, bossPosition, member.getNickname());
+                    scheduleStrategy.markFinished(event.getJDA(), guildId, bossPosition, name);
                 }
                 case UNCOMPLETE -> {
-                    scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, member.getNickname());
+                    scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, name);
                 }
             }
             hook.editOriginal("Success!").queue();
