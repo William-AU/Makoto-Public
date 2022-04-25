@@ -74,7 +74,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                     }
                     attackingBossMap.put(boss, attackers);
                 }
-                case 4, 7, 10, 16, 21, 24, 27, 33 -> {
+                case 4, 7, 10, 13, 16, 21, 24, 27, 30, 33 -> {
                     // These will be the finised attackers for each boss in order
                     int boss = (i - 1) / 3; // Same logic as above, except we need to subtract one or the values don't work for 21 - 32
                     String[] rawUsers = fullMessage[i].split(", ");
