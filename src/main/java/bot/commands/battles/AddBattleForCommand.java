@@ -18,13 +18,13 @@ public class AddBattleForCommand implements ICommand {
     @Override
     public void handle(CommandContext ctx) {
         if (!damageStrategy.validateForOther(ctx.getMessage())) {
-            ctx.reactNegative();
+            ctx.sendError("Damage validation failed");
             return;
         }
         String damage = ctx.getMessage().getContentRaw().split(" ")[1];
         List<Member> mentionedMembers = ctx.getMessage().getMentionedMembers();
         if(mentionedMembers.isEmpty()){
-            ctx.reactNegative();
+            ctx.sendError("No mention");
             return;
         }
 

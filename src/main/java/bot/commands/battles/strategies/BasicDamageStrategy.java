@@ -111,6 +111,7 @@ public class BasicDamageStrategy implements DamageStrategy {
             return false;
         }
         // Mentions that refer to users look like <@!12345678910> where non mentions show up as @1234678910
-        return content[2].startsWith("<@!");
+        return true;
+        //return content[2].startsWith("<@!");
     }
 }
