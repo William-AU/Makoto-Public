@@ -1,15 +1,13 @@
 package bot.listeners;
 
-import bot.commands.scheduling.ScheduleStrategy;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.common.ScheduleButtonType;
 import bot.exceptions.MemberAlreadyExistsException;
 import bot.exceptions.MemberHasAlreadyAttackedException;
 import bot.exceptions.MemberHasNotAttackedException;
 import bot.exceptions.MemberIsNotAttackingException;
 import bot.services.GuildService;
-import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -32,7 +30,13 @@ public class ScheduleButtonListener extends ListenerAdapter {
         Button button = event.getButton();
         String buttonId = button.getId();
         String[] buttonInfo = buttonId.split("-"); // Array should be of size 4 with the following info: ScheduleButtonType, guildID, bossPosition, bossLap
-        ScheduleButtonType type = ScheduleButtonType.valueOf(buttonInfo[0]);
+        ScheduleButtonType type;
+        try {
+            type = ScheduleButtonType.valueOf(buttonInfo[0]);
+        } catch (IllegalArgumentException e) {
+            // If we are in this case, it means the type doesn't exist, therefore this is not a button we should be interacting with!
+            return;
+        }
         String guildId = buttonInfo[1];
         int bossPosition = Integer.parseInt(buttonInfo[2]);
         int lap = Integer.parseInt(buttonInfo[3]);

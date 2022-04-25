@@ -1,6 +1,8 @@
-package bot.commands.scheduling;
+package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
+import bot.commands.framework.ICommandContext;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.common.ScheduleButtonType;
 import bot.exceptions.*;
 import bot.services.BossService;
@@ -95,7 +97,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
 
-    private boolean hasScheduleChannels(CommandContext ctx) {
+    private boolean hasScheduleChannels(ICommandContext ctx) {
         List<TextChannel> channels = ctx.getGuild().getTextChannels();
         System.out.println("EXISTING CHANNELS: " + channels);
         List<String> neededChannels = new ArrayList<>() {{
@@ -115,7 +117,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         return foundChannels.containsAll(neededChannels);
     }
 
-    private void createScheduleChannels(CommandContext ctx) throws ScheduleException {
+    private void createScheduleChannels(ICommandContext ctx) throws ScheduleException {
         ctx.getGuild().createCategory(SCHEDULING_CATEGORY_NAME)
                 // Very messy permissions override, this seems to be the easiest way to make the channel effectively read only, note that all text channels inherit from the category
                 .addPermissionOverride(ctx.getGuild().getPublicRole(), EnumSet.of(Permission.VIEW_CHANNEL), EnumSet.of(Permission.MESSAGE_SEND)).queue(category -> {
@@ -182,7 +184,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
 
     // This has been moved out of the original createSchedule() method to allow it to be called only after the channels have been created
-    private void createAndSendSchedule(CommandContext ctx) {
+    private void createAndSendSchedule(ICommandContext ctx) {
         // When creating the channel, the schedule channel ID is set, this means we now force the channel to be the one created by the bot, no more placing it wherever you want
         String channelID = scheduleService.getScheduleByGuildId(ctx.getGuildId()).getChannelId();
         ctx.getGuild()
@@ -196,7 +198,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 });
     }
 
-    private MessageEmbed createScheduleEmbed(CommandContext ctx) {
+    private MessageEmbed createScheduleEmbed(ICommandContext ctx) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Main scheduling channel");
         eb.setDescription("This channel will contain an overview of all current bosses, as well as what members plan to attack or have already attacked." +
@@ -270,7 +272,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
 
     @Override
-    public void createSchedule(CommandContext ctx) throws ScheduleException {
+    public void createSchedule(ICommandContext ctx) throws ScheduleException {
         GuildEntity guild = guildService.getGuild(ctx.getGuildId());
         boolean hasDeletedChannels = false;
         // Delete old schedule if it exists

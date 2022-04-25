@@ -2,8 +2,7 @@ package bot.commands.misc;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
-import bot.commands.scheduling.EmbedScheduleStrategy;
-import bot.commands.scheduling.ScheduleStrategy;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

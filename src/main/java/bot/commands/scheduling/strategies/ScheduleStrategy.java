@@ -1,6 +1,7 @@
-package bot.commands.scheduling;
+package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
+import bot.commands.framework.ICommandContext;
 import bot.exceptions.*;
 import net.dv8tion.jda.api.JDA;
 
@@ -40,7 +41,7 @@ public interface ScheduleStrategy {
      * Creates a new schedule, this will remove any previous schedule WITHOUT WARNING
      * @param ctx The context of the command call
      */
-    void createSchedule(CommandContext ctx) throws ScheduleException;
+    void createSchedule(ICommandContext ctx) throws ScheduleException;
 
     void deleteSchedule(CommandContext ctx);
 

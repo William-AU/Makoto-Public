@@ -2,6 +2,7 @@ package bot.commands.scheduling;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.commands.tracking.StartCBCommand;
 import bot.exceptions.ScheduleException;
 import bot.utils.PermissionsUtils;

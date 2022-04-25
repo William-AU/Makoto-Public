@@ -1,7 +1,6 @@
 package bot.commands.battles.strategies;
 
-import bot.commands.scheduling.EmbedScheduleStrategy;
-import bot.commands.scheduling.ScheduleStrategy;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.services.BossService;
 import bot.services.GuildService;
 import bot.services.SheetService;

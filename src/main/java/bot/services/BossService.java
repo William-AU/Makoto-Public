@@ -40,7 +40,7 @@ public class BossService {
         }
         int oldPos = oldBoss.getPosition();
         int newPos = oldPos + 1;
-        int stage = oldBoss.getStage();
+        int stage = CBUtils.getStageFromLap(guild.getLap());
         if (oldPos == 5) {
             int currentLap = guild.getLap();
             stage = CBUtils.getStageFromLap(currentLap + 1);
@@ -50,6 +50,26 @@ public class BossService {
         BossEntity newBoss = bossRepository.findBossEntityByStageAndPosition(stage, newPos);
         guild.setBoss(newBoss);
         guild.setCurrentHealth(newBoss.getTotalHealth());
+        guildRepository.save(guild);
+    }
+
+    public void resetBossHP(String guildId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        int currentPosition = guild.getBoss().getPosition();
+        int lap = guild.getLap();
+        int stage = CBUtils.getStageFromLap(lap);
+        int newHP = bossRepository.findBossEntityByStageAndPosition(stage, currentPosition).getTotalHealth();
+        guild.setCurrentHealth(newHP);
+        guildRepository.save(guild);
+    }
+
+    public void resetBoss(String guildId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        int currentPosition = guild.getBoss().getPosition();
+        int lap = guild.getLap();
+        int stage = CBUtils.getStageFromLap(lap);
+        BossEntity newBoss = bossRepository.findBossEntityByStageAndPosition(stage, currentPosition);
+        guild.setBoss(newBoss);
         guildRepository.save(guild);
     }
 
