@@ -326,7 +326,6 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 lapToGet++;
             }
             Optional<Integer> expectedAttacks = scheduleService.getExpectedAttacksForBoss(guildId, bossMap.get(i).getPosition(), lapToGet);
-            System.out.println("LOOKING FOR EXPECTED ATTACKS, FOUND: " + expectedAttacks);
             String expectedString = "?";
             if (expectedAttacks.isPresent()) {
                 expectedString = expectedAttacks.get() + "";
@@ -390,11 +389,12 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 // This is a bit messy, but it is needed in order to avoid a race condition relating to the getHistory() call
                 if (isNewLap) {
                     if (channelBoss == deadBossPosition) {
+                        MessageEmbed embed = createBossEmbed(jda, guildId, finalBossPos, false).get(0);
                         channel.getHistory()
                                 .retrievePast(2)
                                 .map(messages -> messages.get(1))
                                 .queue(message -> message.delete().queue(ignored -> channel
-                                        .sendMessageEmbeds(createBossEmbed(jda, guildId, finalBossPos, false).get(1))
+                                        .sendMessageEmbeds(embed)
                                         .setActionRow(createBossButtons(guildId, finalBossPos + 5))
                                         .queue()));
                     } else {

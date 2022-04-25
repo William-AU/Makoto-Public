@@ -67,7 +67,7 @@ public class OverrideBossCommand implements ICommand {
         for (int i = 0; i < bossDistance; i++) {
             // We have to manually increment the boss up until the desired amount, this WILL take a while because of how slow the database queries are, but oh well
             bossService.setNextBoss(ctx.getGuildId());
-            trackingStrategy.updateData(ctx.getJDA(), ctx.getGuildId(), true);
+            //trackingStrategy.updateData(ctx.getJDA(), ctx.getGuildId(), true);
             scheduleStrategy.updateSchedule(ctx.getJDA(), ctx.getGuildId(), true);
         }
         ctx.reactPositive();

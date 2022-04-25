@@ -45,7 +45,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         boolean hasSchedule = guildEntity.getSchedule() != null;
         if (!hasSchedule) return;
         boolean bossDead = bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
-        trackingStrategy.updateData(jda, guild.getId(), bossDead);
+        //trackingStrategy.updateData(jda, guild.getId(), bossDead);
         scheduleStrategy.updateSchedule(jda, guild.getId(), bossDead);
         updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getNickname());
     }
@@ -72,7 +72,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         // TODO: figure out how to update the damage. Not sure how we can get the previous damage done cleanly,
         //  since that needs to be reverted before this can apply
         if (guildEntity.getSchedule() != null) {
-            trackingStrategy.updateData(jda, guild.getId(), false); // We don't mess with bosses when redoing damage, it's just too messy and it's better to have admins manually fix it
+            //trackingStrategy.updateData(jda, guild.getId(), false); // We don't mess with bosses when redoing damage, it's just too messy and it's better to have admins manually fix it
             scheduleStrategy.updateSchedule(jda, guild.getId(), false);
         }
     }
