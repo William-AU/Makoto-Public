@@ -1,6 +1,8 @@
-package bot.commands.scheduling;
+package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
+import bot.commands.framework.ICommandContext;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.common.ScheduleButtonType;
 import bot.exceptions.*;
 import bot.services.BossService;
@@ -13,6 +15,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.*;
@@ -71,7 +74,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                     }
                     attackingBossMap.put(boss, attackers);
                 }
-                case 4, 7, 10, 16, 21, 24, 27, 33 -> {
+                case 4, 7, 10, 13, 16, 21, 24, 27, 30, 33 -> {
                     // These will be the finised attackers for each boss in order
                     int boss = (i - 1) / 3; // Same logic as above, except we need to subtract one or the values don't work for 21 - 32
                     String[] rawUsers = fullMessage[i].split(", ");
@@ -95,7 +98,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
 
-    private boolean hasScheduleChannels(CommandContext ctx) {
+    private boolean hasScheduleChannels(ICommandContext ctx) {
         List<TextChannel> channels = ctx.getGuild().getTextChannels();
         System.out.println("EXISTING CHANNELS: " + channels);
         List<String> neededChannels = new ArrayList<>() {{
@@ -115,44 +118,50 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         return foundChannels.containsAll(neededChannels);
     }
 
-    private void createScheduleChannels(CommandContext ctx) throws ScheduleException {
-        ctx.getGuild().createCategory(SCHEDULING_CATEGORY_NAME)
-                // Very messy permissions override, this seems to be the easiest way to make the channel effectively read only, note that all text channels inherit from the category
-                .addPermissionOverride(ctx.getGuild().getPublicRole(), EnumSet.of(Permission.VIEW_CHANNEL), EnumSet.of(Permission.MESSAGE_SEND)).queue(category -> {
-            // Potential for a lot of race conditions here if we start working on these channels before they are actually created
-            category.createTextChannel("schedule").queue();
-            category.createTextChannel("boss_1").queue();
-            category.createTextChannel("boss_2").queue();
-            category.createTextChannel("boss_3").queue();
-            category.createTextChannel("boss_4").queue();
-            category.createTextChannel("boss_5").queue(ignored -> {
-                // Very messy, but all further calls are done in here, since we should be able to guarantee this is the last call
-                // There will likely be a lot of rate limiting here, so expect this command to be SLOW on startup
-                for (TextChannel channel : category.getTextChannels()) {
-                    if (channel.getName().equals(SCHEDULING_CHANNEL_NAME)) {
-                        // This should be the target of the main scheduling message
-                        channel.sendMessageEmbeds(createScheduleEmbed(ctx)).queue();
-                        try {
-                            scheduleService.setChannelId(ctx.getGuildId(), channel.getId());
-                            createAndSendSchedule(ctx);
-                        } catch (ScheduleDoesNotExistException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // Handle all 5 boss channels here
-                        // Ugly nested method call, this basically just reads the last number in the name of the channel and parses it as an integer
+    private void createScheduleChannels(ICommandContext ctx) throws ScheduleException {
+        try {
+            ctx.getGuild().createCategory(SCHEDULING_CATEGORY_NAME)
+                    // Very messy permissions override, this seems to be the easiest way to make the channel effectively read only, note that all text channels inherit from the category
+                    .addPermissionOverride(ctx.getGuild().getPublicRole(), EnumSet.of(Permission.VIEW_CHANNEL), EnumSet.of(Permission.MESSAGE_SEND))
+                    // TODO: Fix hard coded bot id
+                    .addPermissionOverride(ctx.getGuild().getRoleByBot("811219718584270868"), EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND), null).queue(category -> {
+                // Potential for a lot of race conditions here if we start working on these channels before they are actually created
+                category.createTextChannel("schedule").queue();
+                category.createTextChannel("boss_1").queue();
+                category.createTextChannel("boss_2").queue();
+                category.createTextChannel("boss_3").queue();
+                category.createTextChannel("boss_4").queue();
+                category.createTextChannel("boss_5").queue(ignored -> {
+                    // Very messy, but all further calls are done in here, since we should be able to guarantee this is the last call
+                    // There will likely be a lot of rate limiting here, so expect this command to be SLOW on startup
+                    for (TextChannel channel : category.getTextChannels()) {
+                        if (channel.getName().equals(SCHEDULING_CHANNEL_NAME)) {
+                            // This should be the target of the main scheduling message
+                            channel.sendMessageEmbeds(createScheduleEmbed(ctx)).queue();
+                            try {
+                                scheduleService.setChannelId(ctx.getGuildId(), channel.getId());
+                                createAndSendSchedule(ctx);
+                            } catch (ScheduleDoesNotExistException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            // Handle all 5 boss channels here
+                            // Ugly nested method call, this basically just reads the last number in the name of the channel and parses it as an integer
 
-                        // NOTE: THIS MEANS WE IMPLICITLY ENFORCE A NAMING SCHEME OF TEXT CHANNELS IN THE CATEGORY
-                        System.out.println("Trying to split: " + channel.getName());
-                        int bossPosition = Integer.parseInt(channel.getName().split("_")[1]);
-                        List<MessageEmbed> bossEmbeds = createBossEmbed(ctx.getJDA(), ctx.getGuildId(), bossPosition, true);
-                        channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(ctx.getGuildId(), bossPosition)).queue(ignored2 -> {
-                            channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(ctx.getGuildId(), bossPosition + 5)).queue();
-                        });
+                            // NOTE: THIS MEANS WE IMPLICITLY ENFORCE A NAMING SCHEME OF TEXT CHANNELS IN THE CATEGORY
+                            System.out.println("Trying to split: " + channel.getName());
+                            int bossPosition = Integer.parseInt(channel.getName().split("_")[1]);
+                            List<MessageEmbed> bossEmbeds = createBossEmbed(ctx.getJDA(), ctx.getGuildId(), bossPosition, true);
+                            channel.sendMessageEmbeds(bossEmbeds.get(0)).setActionRow(createBossButtons(ctx.getGuildId(), bossPosition)).queue(ignored2 -> {
+                                channel.sendMessageEmbeds(bossEmbeds.get(1)).setActionRow(createBossButtons(ctx.getGuildId(), bossPosition + 5)).queue();
+                            });
+                        }
                     }
-                }
+                });
             });
-        });
+        } catch (InsufficientPermissionException e) {
+            throw new ScheduleException();
+        }
     }
 
     private List<Button> createBossButtons(String guildId, int bossPosition) {
@@ -182,7 +191,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
 
     // This has been moved out of the original createSchedule() method to allow it to be called only after the channels have been created
-    private void createAndSendSchedule(CommandContext ctx) {
+    private void createAndSendSchedule(ICommandContext ctx) {
         // When creating the channel, the schedule channel ID is set, this means we now force the channel to be the one created by the bot, no more placing it wherever you want
         String channelID = scheduleService.getScheduleByGuildId(ctx.getGuildId()).getChannelId();
         ctx.getGuild()
@@ -196,7 +205,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 });
     }
 
-    private MessageEmbed createScheduleEmbed(CommandContext ctx) {
+    private MessageEmbed createScheduleEmbed(ICommandContext ctx) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Main scheduling channel");
         eb.setDescription("This channel will contain an overview of all current bosses, as well as what members plan to attack or have already attacked." +
@@ -270,7 +279,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
 
     @Override
-    public void createSchedule(CommandContext ctx) throws ScheduleException {
+    public void createSchedule(ICommandContext ctx) throws ScheduleException {
         GuildEntity guild = guildService.getGuild(ctx.getGuildId());
         boolean hasDeletedChannels = false;
         // Delete old schedule if it exists
@@ -389,11 +398,12 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                 // This is a bit messy, but it is needed in order to avoid a race condition relating to the getHistory() call
                 if (isNewLap) {
                     if (channelBoss == deadBossPosition) {
+                        MessageEmbed embed = createBossEmbed(jda, guildId, finalBossPos, false).get(0);
                         channel.getHistory()
                                 .retrievePast(2)
                                 .map(messages -> messages.get(1))
                                 .queue(message -> message.delete().queue(ignored -> channel
-                                        .sendMessageEmbeds(createBossEmbed(jda, guildId, finalBossPos, false).get(1))
+                                        .sendMessageEmbeds(embed)
                                         .setActionRow(createBossButtons(guildId, finalBossPos + 5))
                                         .queue()));
                     } else {
@@ -452,12 +462,13 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException {
+    public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         if (attackers.get(position).contains(name)) throw new MemberAlreadyExistsException();
         attackers.get(position).add(name);
         Map<Integer, List<String>> attacked = allMembers.get("attacked");
+        if (attacked.get(position).contains(name)) throw new MemberHasAlreadyAttackedException();
         ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
         String guildName = jda.getGuildById(guildId).getName();
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();

@@ -9,6 +9,9 @@ public class MakotoImages {
         add("https://img3.gelbooru.com//samples/b7/be/sample_b7be84f267a2635837967d5ddca0da6d.jpg");
         add("https://i.redd.it/cvzqmicci5p51.png");
         add("https://img3.gelbooru.com//images/cd/5c/cd5c2ec311036c25e5bacf698832a6c6.jpg");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945954799034191892/sample-7d1011b78a2031e7ab7cee1c38afd394.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945582275783983114/a6ddc7d5c9d23c849f8a710c7b2f5e582cc7d0ee.png");
+
     }};
 
     private static final List<String> decentImages = new ArrayList<>(){{
@@ -31,17 +34,30 @@ public class MakotoImages {
         add("https://img3.gelbooru.com//images/7e/05/7e05efdce97d9e9ebb9a72de62c6d909.jpg");
         add("https://img3.gelbooru.com//images/0a/40/0a407402774be92dc432525d2879e94f.jpg");
         add("https://img3.gelbooru.com/images/77/02/7702440cefac9e34ce7141195ac289b1.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945954737172389888/makoto_princess_connect_drawn_by_yaman__8b2f47001c3dfe4b99270855964a62d1.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945582345161965578/EprAbcIW4AAVGVU.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945580556022861875/dd3470b58b229eef574b42211fc64a1b.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945582021206503444/Konachan.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945581410691981344/XWkk5bLoAd1SZucIdUxYUqQz8koFGkWkcZsOjLa7Zs0.png");
+
     }};
 
     private static final List<String> goodImages = new ArrayList<>(){{
         add("https://img3.gelbooru.com/images/55/d6/55d68063e37d7d74857b88a58b43ef4e.jpg");
         add("https://img3.gelbooru.com/images/42/c7/42c7686a1a512fc177310c3cada1b8c5.jpeg");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945581861466431518/9ff99043ea757e73998b0217396b0ac6fb8d76a4.png");
         add("https://img3.gelbooru.com/images/3e/ad/3eade5ecfd55974e4bb450312bae37b2.jpg");
         add("https://img3.gelbooru.com//samples/81/2f/sample_812fa398ffff07ee4933d76d3b759323.jpg");
         add("https://img3.gelbooru.com/images/a2/9f/a29f5daa6d1dbbb089af38c40f1cfd49.png");
         add("https://img3.gelbooru.com/images/2a/a1/2aa1a134545f411f15d9eaea623e6861.jpg");
         add("https://img3.gelbooru.com//images/48/fd/48fdd531b6cf79cb600ba7ecad8ce402.png");
         add("https://img3.gelbooru.com/images/be/c7/bec762ddb217e654d162fd28d08357ec.jpg");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945582185879060480/maxresdefault.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945581829556162641/makoto_princess_connect_and_1_more_drawn_by_houmatu_awa__0bda77ce4b094351723e26f204e20be6.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945582300870090752/98b803bc381f26aa0c42dc7e8844212c54125f89r1-1459-2048v2_00.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945581609313239090/XopiWtOD5FmX0KIHC6HvdhllBk8HF-oW6F52NOGBxnE.png");
+        add("https://cdn.discordapp.com/attachments/934970251467165728/945581434343669800/n24Krf6mQgMCEr_0di9K4T0sIzF-jhlpPBRGp_wxQDU.png");
+
     }};
 
     private static final List<String> veryBadImages = new ArrayList<>() {{

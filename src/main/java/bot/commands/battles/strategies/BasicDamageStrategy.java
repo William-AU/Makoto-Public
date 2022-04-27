@@ -1,7 +1,6 @@
 package bot.commands.battles.strategies;
 
-import bot.commands.scheduling.EmbedScheduleStrategy;
-import bot.commands.scheduling.ScheduleStrategy;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.services.BossService;
 import bot.services.GuildService;
 import bot.services.SheetService;
@@ -42,14 +41,16 @@ public class BasicDamageStrategy implements DamageStrategy {
     }
 
     private void addToSchedule(Guild guild, String userId, String damage, JDA jda, GuildEntity guildEntity) {
-        /*
         boolean hasSchedule = guildEntity.getSchedule() != null;
         if (!hasSchedule) return;
         boolean bossDead = bossService.takeDamage(guild.getId(), Integer.parseInt(damage));
-        trackingStrategy.updateData(jda, guild.getId(), bossDead);
+        //trackingStrategy.updateData(jda, guild.getId(), bossDead);
         scheduleStrategy.updateSchedule(jda, guild.getId(), bossDead);
-        updateSchedule(jda, guild.getId(), guild.getMemberById(userId).getNickname());
-         */
+        String name = guild.getMemberById(userId).getNickname();
+        if (name == null) {
+            name = guild.getMemberById(userId).getEffectiveName();
+        }
+        updateSchedule(jda, guild.getId(), name);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         // TODO: figure out how to update the damage. Not sure how we can get the previous damage done cleanly,
         //  since that needs to be reverted before this can apply
         if (guildEntity.getSchedule() != null) {
-            trackingStrategy.updateData(jda, guild.getId(), false); // We don't mess with bosses when redoing damage, it's just too messy and it's better to have admins manually fix it
+            //trackingStrategy.updateData(jda, guild.getId(), false); // We don't mess with bosses when redoing damage, it's just too messy and it's better to have admins manually fix it
             scheduleStrategy.updateSchedule(jda, guild.getId(), false);
         }
     }
@@ -113,6 +114,7 @@ public class BasicDamageStrategy implements DamageStrategy {
             return false;
         }
         // Mentions that refer to users look like <@!12345678910> where non mentions show up as @1234678910
-        return content[2].startsWith("<@!");
+        return true;
+        //return content[2].startsWith("<@!");
     }
 }

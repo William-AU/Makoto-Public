@@ -2,7 +2,7 @@ package bot.commands.scheduling.bossOverrides;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
-import bot.commands.scheduling.ScheduleStrategy;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.services.GuildService;
 import bot.utils.PermissionsUtils;
 import org.springframework.beans.factory.annotation.Autowired;

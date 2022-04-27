@@ -2,7 +2,9 @@ package bot.commands.scheduling;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.exceptions.MemberAlreadyExistsException;
+import bot.exceptions.MemberHasAlreadyAttackedException;
 import bot.services.GuildService;
 import bot.storage.models.GuildEntity;
 import bot.utils.PermissionsUtils;
@@ -55,6 +57,8 @@ public class AddSpotCommand implements ICommand {
         } catch (MemberAlreadyExistsException e) {
             ctx.sendError("This member is already attacking on this schedule");
             return;
+        } catch (MemberHasAlreadyAttackedException e) {
+            ctx.sendError("This member has already attacked, please first unmark the attack");
         }
         ctx.reactPositive();
     }

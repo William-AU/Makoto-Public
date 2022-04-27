@@ -45,6 +45,12 @@ public class GuildService {
         return guild.getSpreadsheetId();
     }
 
+    public void setLap(String guildId, int newLap) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        guild.setLap(newLap);
+        guildRepository.save(guild);
+    }
+
     public void addSpreadsheetId(String guildId, String spreadSheetId) throws IllegalArgumentException {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         if(guild == null){

@@ -1,7 +1,8 @@
-package bot.commands.scheduling;
+package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
-import bot.common.CBUtils;
+import bot.commands.framework.ICommandContext;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.exceptions.*;
 import bot.services.BossService;
 import bot.services.GuildService;
@@ -12,13 +13,9 @@ import bot.storage.models.ScheduleEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -195,7 +192,7 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void createSchedule(CommandContext ctx) {
+    public void createSchedule(ICommandContext ctx) {
         GuildEntity guild = guildService.getGuild(ctx.getGuildId());
         // If schedule exists, first delete it from the DB and remove the previous message
         if (guild.getSchedule() != null) {

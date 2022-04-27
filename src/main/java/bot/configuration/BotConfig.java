@@ -5,10 +5,11 @@ import bot.commands.battles.strategies.DamageBasedPictureStrategy;
 import bot.commands.battles.strategies.DamageStrategy;
 import bot.commands.battles.strategies.PictureStrategy;
 import bot.commands.framework.ICommand;
-import bot.commands.scheduling.MessageScheduleStrategy;
-import bot.commands.scheduling.ScheduleStrategy;
+import bot.commands.scheduling.strategies.MessageScheduleStrategy;
+import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.commands.tracking.TrackingStrategy;
 import bot.listeners.CommandListener;
+import bot.listeners.ConfirmButtonListener;
 import bot.listeners.ScheduleButtonListener;
 import bot.services.BossService;
 import bot.services.GuildService;
@@ -81,6 +82,7 @@ public class BotConfig {
 
         jdaBuilder.addEventListeners(new CommandListener(commands));
         jdaBuilder.addEventListeners(new ScheduleButtonListener(scheduleStrategy(scheduleService, guildService, bossService), guildService));
+        jdaBuilder.addEventListeners(new ConfirmButtonListener(scheduleStrategy(scheduleService, guildService, bossService), guildService, bossService));
 
         return jdaBuilder.build();
     }
