@@ -5,16 +5,15 @@ import bot.commands.battles.strategies.DamageBasedPictureStrategy;
 import bot.commands.battles.strategies.DamageStrategy;
 import bot.commands.battles.strategies.PictureStrategy;
 import bot.commands.framework.ICommand;
-import bot.commands.scheduling.strategies.MessageScheduleStrategy;
+import bot.commands.scheduling.strategies.DBExpectedAttackStrategy;
+import bot.commands.scheduling.strategies.DatabaseScheduleStrategy;
+import bot.commands.scheduling.strategies.ExpectedAttackStrategy;
 import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.commands.tracking.TrackingStrategy;
 import bot.listeners.CommandListener;
 import bot.listeners.ConfirmButtonListener;
 import bot.listeners.ScheduleButtonListener;
-import bot.services.BossService;
-import bot.services.GuildService;
-import bot.services.ScheduleService;
-import bot.services.SheetService;
+import bot.services.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -42,15 +41,15 @@ public class BotConfig {
     private final SheetService sheetService;
     private final BossService bossService;
     private final TrackingStrategy trackingStrategy;
-    private final ScheduleService scheduleService;
+    private final MessageBasedScheduleService messageBasedScheduleService;
 
     @Autowired
-    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, ScheduleService scheduleService) {
+    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, MessageBasedScheduleService messageBasedScheduleService) {
         this.guildService = guildService;
         this.sheetService = sheetService;
         this.bossService = bossService;
         this.trackingStrategy = trackingStrategy;
-        this.scheduleService = scheduleService;
+        this.messageBasedScheduleService = messageBasedScheduleService;
     }
 
     @Bean
@@ -81,8 +80,8 @@ public class BotConfig {
 
 
         jdaBuilder.addEventListeners(new CommandListener(commands));
-        jdaBuilder.addEventListeners(new ScheduleButtonListener(scheduleStrategy(scheduleService, guildService, bossService), guildService));
-        jdaBuilder.addEventListeners(new ConfirmButtonListener(scheduleStrategy(scheduleService, guildService, bossService), guildService, bossService));
+        jdaBuilder.addEventListeners(new ScheduleButtonListener(scheduleStrategy(messageBasedScheduleService, guildService, bossService), guildService));
+        jdaBuilder.addEventListeners(new ConfirmButtonListener(scheduleStrategy(messageBasedScheduleService, guildService, bossService), guildService, bossService));
 
         return jdaBuilder.build();
     }
@@ -90,8 +89,8 @@ public class BotConfig {
     // Define strategies here
     @Bean
     @Autowired
-    public DamageStrategy damageStrategy(ScheduleService scheduleService) {
-        return new BasicDamageStrategy(guildService, sheetService, bossService, trackingStrategy, scheduleStrategy(scheduleService, guildService, bossService));
+    public DamageStrategy damageStrategy(MessageBasedScheduleService messageBasedScheduleService) {
+        return new BasicDamageStrategy(guildService, sheetService, bossService, trackingStrategy, scheduleStrategy(messageBasedScheduleService, guildService, bossService));
     }
 
     @Bean
@@ -100,7 +99,12 @@ public class BotConfig {
     }
 
     @Bean
-    public ScheduleStrategy scheduleStrategy(ScheduleService scheduleService, GuildService guildService, BossService bossService) {
-        return new MessageScheduleStrategy(scheduleService, guildService, bossService);
+    public ScheduleStrategy scheduleStrategy(MessageBasedScheduleService messageBasedScheduleService, GuildService guildService, BossService bossService) {
+        return new DatabaseScheduleStrategy();
+    }
+
+    @Bean
+    public ExpectedAttackStrategy expectedAttackStrategy(DatabaseScheduleService scheduleService) {
+        return new DBExpectedAttackStrategy(scheduleService);
     }
 }

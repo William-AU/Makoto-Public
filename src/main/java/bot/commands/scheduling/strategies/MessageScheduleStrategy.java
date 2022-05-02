@@ -2,15 +2,16 @@ package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommandContext;
-import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.common.ScheduleButtonType;
 import bot.exceptions.*;
+import bot.exceptions.schedule.ScheduleDoesNotExistException;
+import bot.exceptions.schedule.ScheduleException;
 import bot.services.BossService;
 import bot.services.GuildService;
-import bot.services.ScheduleService;
+import bot.services.MessageBasedScheduleService;
 import bot.storage.models.BossEntity;
 import bot.storage.models.GuildEntity;
-import bot.storage.models.ScheduleEntity;
+import bot.storage.models.MessageScheduleEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -21,7 +22,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import java.util.*;
 
 public class MessageScheduleStrategy implements ScheduleStrategy {
-    private final ScheduleService scheduleService;
+    private final MessageBasedScheduleService messageBasedScheduleService;
     private final GuildService guildService;
     private final BossService bossService;
 
@@ -32,8 +33,8 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     private final String SCHEDULING_CATEGORY_NAME = "makoto-scheduling";
     private final String SCHEDULING_CHANNEL_NAME = "schedule";
 
-    public MessageScheduleStrategy(ScheduleService scheduleService, GuildService guildService, BossService bossService) {
-        this.scheduleService = scheduleService;
+    public MessageScheduleStrategy(MessageBasedScheduleService messageBasedScheduleService, GuildService guildService, BossService bossService) {
+        this.messageBasedScheduleService = messageBasedScheduleService;
         this.guildService = guildService;
         this.bossService = bossService;
     }
@@ -46,13 +47,13 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
      */
     @Override
     public boolean hasActiveSchedule(String guildId) {
-        return scheduleService.hasActiveScheduleForBoss(guildId);
+        return messageBasedScheduleService.hasActiveScheduleForBoss(guildId);
     }
 
     @Override
     // Note: This can NEVER be called in a queue callback, because it uses .complete()
     public Map<String, Map<Integer, List<String>>> extractMembers(JDA jda, String guildId) {
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         Message message = jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).retrieveMessageById(schedule.getMessageId()).complete();
         String[] fullMessage = message.getContentRaw().split("\n");
         System.out.println(Arrays.toString(fullMessage));
@@ -139,7 +140,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
                             // This should be the target of the main scheduling message
                             channel.sendMessageEmbeds(createScheduleEmbed(ctx)).queue();
                             try {
-                                scheduleService.setChannelId(ctx.getGuildId(), channel.getId());
+                                messageBasedScheduleService.setChannelId(ctx.getGuildId(), channel.getId());
                                 createAndSendSchedule(ctx);
                             } catch (ScheduleDoesNotExistException e) {
                                 e.printStackTrace();
@@ -193,14 +194,14 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     // This has been moved out of the original createSchedule() method to allow it to be called only after the channels have been created
     private void createAndSendSchedule(ICommandContext ctx) {
         // When creating the channel, the schedule channel ID is set, this means we now force the channel to be the one created by the bot, no more placing it wherever you want
-        String channelID = scheduleService.getScheduleByGuildId(ctx.getGuildId()).getChannelId();
+        String channelID = messageBasedScheduleService.getScheduleByGuildId(ctx.getGuildId()).getChannelId();
         ctx.getGuild()
                 .getTextChannelById(channelID)
                 // TODO: Consider fixing this null pointer, although it theoretically shouldn't matter
                 .sendMessage(createMessage(ctx.getGuildId(), ctx.getGuild().getName(), new HashMap<>(), new HashMap<>()))
                 .queue(message -> {
                     try {
-                        scheduleService.setMessageId(ctx.getGuildId(), message.getId());
+                        messageBasedScheduleService.setMessageId(ctx.getGuildId(), message.getId());
                     } catch (ScheduleDoesNotExistException ignored) {  } // We literally just created this schedule, if it doesn't exist something is seriously wrong
                 });
     }
@@ -284,7 +285,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         boolean hasDeletedChannels = false;
         // Delete old schedule if it exists
         if (guild.getSchedule() != null) {
-            scheduleService.deleteSchedule(ctx.getGuildId());
+            messageBasedScheduleService.deleteSchedule(ctx.getGuildId());
             // Check if channels exist
             List<Category> categories = ctx.getGuild().getCategoriesByName(SCHEDULING_CATEGORY_NAME, true);
             if (categories.size() > 0) {
@@ -299,7 +300,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         }
         // Create new schedule
         System.out.println("CREATING SCHEDULE");
-        scheduleService.createScheduleForGuild(ctx.getGuildId());
+        messageBasedScheduleService.createScheduleForGuild(ctx.getGuildId());
 
         System.out.println("CHECKING IF CHANNELS EXIST");
         if (hasDeletedChannels || !hasScheduleChannels(ctx)) {
@@ -334,7 +335,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
             if (i > 5) {
                 lapToGet++;
             }
-            Optional<Integer> expectedAttacks = scheduleService.getExpectedAttacksForBoss(guildId, bossMap.get(i).getPosition(), lapToGet);
+            Optional<Integer> expectedAttacks = messageBasedScheduleService.getExpectedAttacksForBoss(guildId, bossMap.get(i).getPosition(), lapToGet);
             String expectedString = "?";
             if (expectedAttacks.isPresent()) {
                 expectedString = expectedAttacks.get() + "";
@@ -367,9 +368,9 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
     @Override
     public void deleteSchedule(CommandContext ctx) {
-        ScheduleEntity scheduleEntity = scheduleService.getScheduleByGuildId(ctx.getGuildId());
-        String channelId = scheduleEntity.getChannelId();
-        String messageId = scheduleEntity.getMessageId();
+        MessageScheduleEntity messageScheduleEntity = messageBasedScheduleService.getScheduleByGuildId(ctx.getGuildId());
+        String channelId = messageScheduleEntity.getChannelId();
+        String messageId = messageScheduleEntity.getMessageId();
         ctx.getGuild().getTextChannelById(channelId).deleteMessageById(messageId).queue();
     }
 
@@ -425,7 +426,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
 
     @Override
     public void updateSchedule(JDA jda, String guildId, boolean bossDead) {
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         if (schedule == null) return;
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
@@ -469,7 +470,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         attackers.get(position).add(name);
         Map<Integer, List<String>> attacked = allMembers.get("attacked");
         if (attacked.get(position).contains(name)) throw new MemberHasAlreadyAttackedException();
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         String guildName = jda.getGuildById(guildId).getName();
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
@@ -495,7 +496,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         if (!(attackers.get(position).contains(name) || attacked.get(position).contains(name))) throw new MemberIsNotAttackingException();
         attackers.get(position).remove(name);
         attacked.get(position).remove(name);
@@ -528,7 +529,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         if (!attackers.get(position).contains(name)) throw new MemberIsNotAttackingException();
         attackers.get(position).remove(name);
         attacked.get(position).add(name);
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
         int firstPos = position;
@@ -556,7 +557,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         if (!attacked.get(position).contains(name)) throw new MemberHasNotAttackedException();
         attacked.get(position).remove(name);
         attackers.get(position).add(name);
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         jda.getGuildById(guildId).getTextChannelById(schedule.getChannelId()).editMessageById(schedule.getMessageId(), createMessage(guildId, guildName, attackers, attacked)).complete();
         List<MessageEmbed> bossEmbeds = createBossEmbed(jda, guildId, position, false);
         int firstPos = position;
@@ -578,7 +579,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     @Override
     public boolean isAttackingCurrentBoss(JDA jda, String guildId, String user) {
         GuildEntity guild = guildService.getGuild(guildId);
-        ScheduleEntity schedule = scheduleService.getScheduleByGuildId(guildId);
+        MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
         Map<Integer, List<String>> attackingMap = extractMembers(jda, guildId).get(ATTACKING);
         int position = guild.getBoss().getPosition();
         return attackingMap.get(position).contains(user);

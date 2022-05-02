@@ -2,12 +2,9 @@ package bot.storage.models;
 
 import bot.configuration.GuildImagePreference;
 import lombok.Data;
-import org.jetbrains.annotations.Async;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
-import java.lang.invoke.CallSite;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -36,8 +33,17 @@ public class GuildEntity {
 
     private Integer lap;
 
+    @ManyToMany
+    private List<ExpectedAttacksEntity> expectedAttacks;
+
+
+    /**
+     * Old way to handle schedules using discord messages, kept in the DB as backwards compatability
+     * @deprecated do not access schedules from the guild directly, use guildID instead
+     */
+    @Deprecated
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private ScheduleEntity schedule;
+    private MessageScheduleEntity schedule;
 
     @Enumerated(EnumType.STRING)
     private GuildImagePreference imagePreference = GuildImagePreference.NONE;

@@ -3,6 +3,7 @@ package bot.commands.scheduling.strategies;
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommandContext;
 import bot.exceptions.*;
+import bot.exceptions.schedule.ScheduleException;
 import net.dv8tion.jda.api.JDA;
 
 import java.util.List;

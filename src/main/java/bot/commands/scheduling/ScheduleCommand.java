@@ -4,7 +4,7 @@ import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
 import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.commands.tracking.StartCBCommand;
-import bot.exceptions.ScheduleException;
+import bot.exceptions.schedule.ScheduleException;
 import bot.utils.PermissionsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

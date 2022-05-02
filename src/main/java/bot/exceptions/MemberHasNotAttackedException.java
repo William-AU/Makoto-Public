@@ -1,4 +1,6 @@
 package bot.exceptions;
 
-public class MemberHasNotAttackedException extends ScheduleException{
+import bot.exceptions.schedule.ScheduleException;
+
+public class MemberHasNotAttackedException extends ScheduleException {
 }

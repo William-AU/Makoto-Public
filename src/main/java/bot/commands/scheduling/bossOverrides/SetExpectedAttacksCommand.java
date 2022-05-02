@@ -2,8 +2,9 @@ package bot.commands.scheduling.bossOverrides;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommand;
+import bot.commands.scheduling.strategies.ExpectedAttackStrategy;
 import bot.commands.scheduling.strategies.ScheduleStrategy;
-import bot.services.ScheduleService;
+import bot.services.MessageBasedScheduleService;
 import bot.utils.PermissionsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,12 +14,12 @@ import java.util.List;
 
 @Service
 public class SetExpectedAttacksCommand implements ICommand {
-    private final ScheduleService scheduleService;
+    private final ExpectedAttackStrategy expectedAttackStrategy;
     private final ScheduleStrategy scheduleStrategy;
 
     @Autowired
-    public SetExpectedAttacksCommand(ScheduleService scheduleService, ScheduleStrategy scheduleStrategy) {
-        this.scheduleService = scheduleService;
+    public SetExpectedAttacksCommand(ExpectedAttackStrategy expectedAttackStrategy, ScheduleStrategy scheduleStrategy) {
+        this.expectedAttackStrategy = expectedAttackStrategy;
         this.scheduleStrategy = scheduleStrategy;
     }
 
@@ -48,7 +49,7 @@ public class SetExpectedAttacksCommand implements ICommand {
             return;
         }
 
-        scheduleService.setExpectedAttacks(ctx.getGuildId(), pos, lap, expected);
+        expectedAttackStrategy.setExpectedAttacks(ctx.getGuildId(), pos, lap, expected);
         scheduleStrategy.updateSchedule(ctx.getJDA(), ctx.getGuildId(), false);
         ctx.reactPositive();
     }

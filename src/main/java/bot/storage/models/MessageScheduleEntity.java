@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Data
 @Entity
-public class ScheduleEntity {
+public class MessageScheduleEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;

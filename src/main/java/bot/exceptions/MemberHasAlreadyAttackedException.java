@@ -1,4 +1,6 @@
 package bot.exceptions;
 
-public class MemberHasAlreadyAttackedException extends ScheduleException{
+import bot.exceptions.schedule.ScheduleException;
+
+public class MemberHasAlreadyAttackedException extends ScheduleException {
 }

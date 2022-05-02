@@ -130,4 +130,9 @@ public class BossService {
     public Integer getPositionFromBossName(String bossName) {
         return bossRepository.findBossEntityByNameAndStage(bossName, 1).getPosition();
     }
+
+    public BossEntity getBossFromLapAndPosition(int lap, int position) {
+        int stage = CBUtils.getStageFromLap(lap);
+        return bossRepository.findBossEntityByStageAndPosition(stage, position);
+    }
 }
