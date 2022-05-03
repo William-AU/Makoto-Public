@@ -41,10 +41,10 @@ public class BotConfig {
     private final SheetService sheetService;
     private final BossService bossService;
     private final TrackingStrategy trackingStrategy;
-    private final MessageBasedScheduleService messageBasedScheduleService;
+    private final DatabaseScheduleService messageBasedScheduleService;
 
     @Autowired
-    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, MessageBasedScheduleService messageBasedScheduleService) {
+    public BotConfig(GuildService guildService, SheetService sheetService, BossService bossService, TrackingStrategy trackingStrategy, DatabaseScheduleService messageBasedScheduleService) {
         this.guildService = guildService;
         this.sheetService = sheetService;
         this.bossService = bossService;
@@ -89,7 +89,7 @@ public class BotConfig {
     // Define strategies here
     @Bean
     @Autowired
-    public DamageStrategy damageStrategy(MessageBasedScheduleService messageBasedScheduleService) {
+    public DamageStrategy damageStrategy(DatabaseScheduleService messageBasedScheduleService) {
         return new BasicDamageStrategy(guildService, sheetService, bossService, trackingStrategy, scheduleStrategy(messageBasedScheduleService, guildService, bossService));
     }
 
@@ -99,8 +99,8 @@ public class BotConfig {
     }
 
     @Bean
-    public ScheduleStrategy scheduleStrategy(MessageBasedScheduleService messageBasedScheduleService, GuildService guildService, BossService bossService) {
-        return new DatabaseScheduleStrategy();
+    public ScheduleStrategy scheduleStrategy(DatabaseScheduleService scheduleService, GuildService guildService, BossService bossService) {
+        return new DatabaseScheduleStrategy(scheduleService, guildService, bossService);
     }
 
     @Bean

@@ -1,15 +1,29 @@
 package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
+import bot.commands.framework.ICommand;
 import bot.commands.framework.ICommandContext;
 import bot.exceptions.*;
 import bot.exceptions.schedule.ScheduleException;
+import bot.services.BossService;
+import bot.services.DatabaseScheduleService;
+import bot.services.GuildService;
 import net.dv8tion.jda.api.JDA;
 
 import java.util.List;
 import java.util.Map;
 
 public class DatabaseScheduleStrategy implements ScheduleStrategy{
+    private final DatabaseScheduleService scheduleService;
+    private final GuildService guildService;
+    private final BossService bossService;
+
+    public DatabaseScheduleStrategy(DatabaseScheduleService scheduleService, GuildService guildService, BossService bossService) {
+        this.scheduleService = scheduleService;
+        this.guildService = guildService;
+        this.bossService = bossService;
+    }
+
     /**
      * Check if a guild already has a schedule
      *
@@ -18,13 +32,10 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
      */
     @Override
     public boolean hasActiveSchedule(String guildId) {
-        return false;
+        // There will always be a schedule, it is just sometimes empty, but that doesn't matter
+        return true;
     }
 
-    @Override
-    public Map<String, Map<Integer, List<String>>> extractMembers(JDA jda, String guildId) {
-        return null;
-    }
 
     /**
      * Creates a new schedule, this will remove any previous schedule WITHOUT WARNING
@@ -33,11 +44,24 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
      */
     @Override
     public void createSchedule(ICommandContext ctx) throws ScheduleException {
+        // Treat this as a reset
+        scheduleService.reset(ctx.getGuildId());
+
+        if (!channelsExist(ctx)) {
+            createChannels(ctx);
+        }
+    }
+
+    private boolean channelsExist(ICommandContext ctx) {
+
+    }
+
+    private void createChannels(ICommandContext ctx) {
 
     }
 
     @Override
-    public void deleteSchedule(CommandContext ctx) {
+    public void deleteSchedule(ICommandContext ctx) {
 
     }
 

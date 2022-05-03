@@ -120,7 +120,6 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
     }
 
     // Very scuffed return value, but this is essentially "just" a tuple of two maps, the keys for the outer map will ALWAYS be either "attacking" or "attacked"
-    @Override
     public Map<String, Map<Integer, List<String>>> extractMembers(JDA jda, String guildId) {
         String rawContent = extractAllContent(jda, guildId);
         String[] fieldArr = rawContent.split(";");
@@ -218,7 +217,7 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void deleteSchedule(CommandContext ctx) {
+    public void deleteSchedule(ICommandContext ctx) {
         // TODO: Throw exception if schedule doesn't exist
         MessageScheduleEntity messageScheduleEntity = messageBasedScheduleService.getScheduleByGuildId(ctx.getGuildId());
         String channelId = messageScheduleEntity.getChannelId();

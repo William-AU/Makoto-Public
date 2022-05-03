@@ -80,5 +80,9 @@ public class DatabaseScheduleService {
         guildRepository.save(guild);
     }
 
+    public void reset(String guildId) {
+        scheduleRepository.deleteDBScheduleEntitiesByGuildId(guildId);
+    }
+
 
 }

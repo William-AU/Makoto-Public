@@ -16,10 +16,7 @@ public class TestCommand implements ICommand {
 
     @Override
     public void handle(CommandContext ctx) {
-        scheduleStrategy.extractMembers(ctx.getJDA(), ctx.getGuildId());
-        System.out.println(ctx.getMessage().getContentRaw());
-        String content = ctx.getMessage().getContentRaw().split(" ")[1];
-        System.out.println(content.substring(3, content.length() - 1));
+
     }
 
     @Override

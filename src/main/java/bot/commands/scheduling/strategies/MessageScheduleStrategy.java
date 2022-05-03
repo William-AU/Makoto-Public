@@ -50,7 +50,6 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         return messageBasedScheduleService.hasActiveScheduleForBoss(guildId);
     }
 
-    @Override
     // Note: This can NEVER be called in a queue callback, because it uses .complete()
     public Map<String, Map<Integer, List<String>>> extractMembers(JDA jda, String guildId) {
         MessageScheduleEntity schedule = messageBasedScheduleService.getScheduleByGuildId(guildId);
@@ -367,7 +366,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void deleteSchedule(CommandContext ctx) {
+    public void deleteSchedule(ICommandContext ctx) {
         MessageScheduleEntity messageScheduleEntity = messageBasedScheduleService.getScheduleByGuildId(ctx.getGuildId());
         String channelId = messageScheduleEntity.getChannelId();
         String messageId = messageScheduleEntity.getMessageId();

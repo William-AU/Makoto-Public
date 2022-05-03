@@ -35,16 +35,13 @@ public interface ScheduleStrategy {
      */
     boolean hasActiveSchedule(String guildId);
 
-    // Very scuffed return value, but this is essentially "just" a tuple of two maps, the keys for the outer map will ALWAYS be either "attacking" or "attacked"
-    Map<String, Map<Integer, List<String>>> extractMembers(JDA jda, String guildId);
-
     /**
      * Creates a new schedule, this will remove any previous schedule WITHOUT WARNING
      * @param ctx The context of the command call
      */
     void createSchedule(ICommandContext ctx) throws ScheduleException;
 
-    void deleteSchedule(CommandContext ctx);
+    void deleteSchedule(ICommandContext ctx);
 
     void updateSchedule(JDA jda, String guildId, boolean bossDead);
 
