@@ -53,7 +53,7 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     }
 
     private boolean channelsExist(ICommandContext ctx) {
-
+        return true;
     }
 
     private void createChannels(ICommandContext ctx) {
