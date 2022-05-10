@@ -45,13 +45,13 @@ public interface ScheduleStrategy {
 
     void updateSchedule(JDA jda, String guildId, boolean bossDead);
 
-    void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException;
+    void addAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException;
 
-    void removeAttacker(JDA jda, String guildId, Integer position, String name) throws MemberIsNotAttackingException;
+    void removeAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberIsNotAttackingException;
 
-    void markFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException;
+    void markFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException;
 
-    void unMarkFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasNotAttackedException;
+    void unMarkFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasNotAttackedException;
 
     /**
      * Validates the arguments in a generic schedule command
@@ -69,7 +69,7 @@ public interface ScheduleStrategy {
     /**
      * Ensures a name is a valid mention
      * @param ctx command context
-     * @return The effective name of a member
+     * @return The effective name of a member   All methods should manually find the nickname if needed!
      * @throws Exception Throws exception if name is not a mention, or member is not found
      */
     default String parseName(CommandContext ctx) throws Exception {
@@ -80,8 +80,6 @@ public interface ScheduleStrategy {
         try {
             String id = content[1].substring(2, content[1].length() - 1);
             Long.parseLong(id);
-            String name = ctx.getGuild().getMemberById(id).getNickname();
-            if (name != null) return name;
             return ctx.getGuild().getMemberById(id).getEffectiveName();
         } catch (NumberFormatException e) {
             throw new Exception("User must be a mention");
@@ -110,9 +108,11 @@ public interface ScheduleStrategy {
         } catch (NumberFormatException e) {
             throw new Exception("Position and Lap must be numbers, please use `!" + command + " <@user> <position> <lap>`");
         }
+        /* DEPRECATED
         if (lap != currentLap && lap != (currentLap + 1)) {
             throw new Exception("The lap must be either the current lap or the next lap, scheduling further than the next lap is not currently supported");
         }
+         */
         return lap;
     }
     /**

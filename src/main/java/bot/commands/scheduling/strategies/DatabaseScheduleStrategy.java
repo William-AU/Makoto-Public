@@ -1,17 +1,18 @@
 package bot.commands.scheduling.strategies;
 
-import bot.commands.framework.CommandContext;
-import bot.commands.framework.ICommand;
 import bot.commands.framework.ICommandContext;
+import bot.common.BotConstants;
 import bot.exceptions.*;
 import bot.exceptions.schedule.ScheduleException;
 import bot.services.BossService;
 import bot.services.DatabaseScheduleService;
 import bot.services.GuildService;
+import bot.storage.models.DBScheduleEntity;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Member;
 
 import java.util.List;
-import java.util.Map;
 
 public class DatabaseScheduleStrategy implements ScheduleStrategy{
     private final DatabaseScheduleService scheduleService;
@@ -53,16 +54,30 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     }
 
     private boolean channelsExist(ICommandContext ctx) {
-        return true;
+        List<Category> categories = ctx.getGuild().getCategories();
+        for (Category category : categories) {
+            if (category.getName().equals(BotConstants.SCHEDULING_CATEGORY_NAME)) return true;
+        }
+        return false;
     }
 
     private void createChannels(ICommandContext ctx) {
-
+        ctx.getGuild().createCategory(BotConstants.SCHEDULING_CATEGORY_NAME).queue(category -> {
+            category.createTextChannel(BotConstants.SCHEDULING_CHANNEL_NAME).queue();
+            category.createTextChannel("boss_1").queue();
+            category.createTextChannel("boss_2").queue();
+            category.createTextChannel("boss_3").queue();
+            category.createTextChannel("boss_4").queue();
+            category.createTextChannel("boss_5").queue();
+        });
     }
 
     @Override
     public void deleteSchedule(ICommandContext ctx) {
-
+        if (!channelsExist(ctx)) return;;
+        Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, true).get(0);
+        category.getTextChannels().forEach(channel -> channel.delete().queue());
+        category.delete().queue();
     }
 
     @Override
@@ -71,22 +86,28 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     }
 
     @Override
-    public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
+    public void addAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
+        DBScheduleEntity.ScheduleUser user = new DBScheduleEntity.ScheduleUser();
+        Member discordUser = jda.getGuildById(guildId).getMembersByName(name, false).get(0);
+        user.setUserId(discordUser.getId());
+        user.setUserNick(discordUser.getNickname());
+        user.setHasAttacked(false);
+        //scheduleService.addUserToBoss();
 
     }
 
     @Override
-    public void removeAttacker(JDA jda, String guildId, Integer position, String name) throws MemberIsNotAttackingException {
+    public void removeAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberIsNotAttackingException {
 
     }
 
     @Override
-    public void markFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException {
+    public void markFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException {
 
     }
 
     @Override
-    public void unMarkFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasNotAttackedException {
+    public void unMarkFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasNotAttackedException {
 
     }
 

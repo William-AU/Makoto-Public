@@ -48,12 +48,7 @@ public class CompleteSpotCommand implements ICommand {
         }
 
         try {
-            if (lap == currentLap) {
-                scheduleStrategy.markFinished(ctx.getJDA(), ctx.getGuildId(), position, name);
-            }
-            else {
-                scheduleStrategy.markFinished(ctx.getJDA(), ctx.getGuildId(), position + 5, name);
-            }
+            scheduleStrategy.markFinished(ctx.getJDA(), ctx.getGuildId(), position, lap, name);
         } catch (MemberHasAlreadyAttackedException e) {
             ctx.sendError("Member has already attacked");
             return;

@@ -48,12 +48,7 @@ public class AddSpotCommand implements ICommand {
         }
 
         try {
-            if (lap == currentLap) {
-                scheduleStrategy.addAttacker(ctx.getJDA(), ctx.getGuildId(), position, name);
-            }
-            else {
-                scheduleStrategy.addAttacker(ctx.getJDA(), ctx.getGuildId(), position + 5, name);
-            }
+            scheduleStrategy.addAttacker(ctx.getJDA(), ctx.getGuildId(), position, lap, name);
         } catch (MemberAlreadyExistsException e) {
             ctx.sendError("This member is already attacking on this schedule");
             return;

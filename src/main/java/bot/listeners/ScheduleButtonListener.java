@@ -54,16 +54,16 @@ public class ScheduleButtonListener extends ListenerAdapter {
             }
             switch (type) {
                 case JOIN -> {
-                    scheduleStrategy.addAttacker(event.getJDA(), guildId, bossPosition, name);
+                    scheduleStrategy.addAttacker(event.getJDA(), guildId, bossPosition, 0, name);
                 }
                 case LEAVE -> {
-                    scheduleStrategy.removeAttacker(event.getJDA(), guildId, bossPosition, name);
+                    scheduleStrategy.removeAttacker(event.getJDA(), guildId, bossPosition, 0, name);
                 }
                 case COMPLETE -> {
-                    scheduleStrategy.markFinished(event.getJDA(), guildId, bossPosition, name);
+                    scheduleStrategy.markFinished(event.getJDA(), guildId, bossPosition, 0, name);
                 }
                 case UNCOMPLETE -> {
-                    scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, name);
+                    scheduleStrategy.unMarkFinished(event.getJDA(), guildId, bossPosition, 0, name);
                 }
             }
             hook.editOriginal("Success!").queue();

@@ -37,7 +37,7 @@ public class BasicDamageStrategy implements DamageStrategy {
         if (!scheduleStrategy.hasActiveSchedule(guildId)) return;
         if (!scheduleStrategy.isAttackingCurrentBoss(jda, guildId, userName)) return;
         int currentPosition = guildService.getGuild(guildId).getBoss().getPosition();
-        scheduleStrategy.markFinished(jda, guildId, currentPosition, userName);
+        scheduleStrategy.markFinished(jda, guildId, currentPosition, 0, userName);
     }
 
     private void addToSchedule(Guild guild, String userId, String damage, JDA jda, GuildEntity guildEntity) {

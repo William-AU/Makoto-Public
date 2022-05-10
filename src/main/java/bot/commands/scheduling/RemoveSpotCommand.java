@@ -47,12 +47,7 @@ public class RemoveSpotCommand implements ICommand {
         }
 
         try {
-            if (lap == currentLap) {
-                scheduleStrategy.removeAttacker(ctx.getJDA(), ctx.getGuildId(), position, name);
-            }
-            else {
-                scheduleStrategy.removeAttacker(ctx.getJDA(), ctx.getGuildId(), position + 5, name);
-            }
+            scheduleStrategy.removeAttacker(ctx.getJDA(), ctx.getGuildId(), position, lap, name);
         } catch (MemberIsNotAttackingException e) {
             ctx.sendError("User is not registered to this schedule");
             return;

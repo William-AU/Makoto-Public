@@ -2,6 +2,7 @@ package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommandContext;
+import bot.common.BotConstants;
 import bot.common.ScheduleButtonType;
 import bot.exceptions.*;
 import bot.exceptions.schedule.ScheduleDoesNotExistException;
@@ -30,8 +31,8 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     private final String ATTACKED = "attacked";
 
     // Define this as a constant to avoid typos and to allow renaming the category name
-    private final String SCHEDULING_CATEGORY_NAME = "makoto-scheduling";
-    private final String SCHEDULING_CHANNEL_NAME = "schedule";
+    private final String SCHEDULING_CATEGORY_NAME = BotConstants.SCHEDULING_CATEGORY_NAME;
+    private final String SCHEDULING_CHANNEL_NAME = BotConstants.SCHEDULING_CHANNEL_NAME;
 
     public MessageScheduleStrategy(MessageBasedScheduleService messageBasedScheduleService, GuildService guildService, BossService bossService) {
         this.messageBasedScheduleService = messageBasedScheduleService;
@@ -462,7 +463,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void addAttacker(JDA jda, String guildId, Integer position, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
+    public void addAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         if (attackers.get(position).contains(name)) throw new MemberAlreadyExistsException();
@@ -491,7 +492,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void removeAttacker(JDA jda, String guildId, Integer position, String name) throws MemberIsNotAttackingException {
+    public void removeAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberIsNotAttackingException {
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
         Map<Integer, List<String>> attacked = allMembers.get(ATTACKED);
@@ -519,7 +520,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void markFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException {
+    public void markFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException {
         String guildName = jda.getGuildById(guildId).getName();
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);
@@ -548,7 +549,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public void unMarkFinished(JDA jda, String guildId, Integer position, String name) throws MemberHasNotAttackedException {
+    public void unMarkFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasNotAttackedException {
         String guildName = jda.getGuildById(guildId).getName();
         Map<String, Map<Integer, List<String>>> allMembers = extractMembers(jda, guildId);
         Map<Integer, List<String>> attackers = allMembers.get(ATTACKING);

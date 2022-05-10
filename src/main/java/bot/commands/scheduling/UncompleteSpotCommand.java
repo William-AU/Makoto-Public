@@ -47,12 +47,7 @@ public class UncompleteSpotCommand implements ICommand {
         }
 
         try {
-            if (lap == currentLap) {
-                scheduleStrategy.unMarkFinished(ctx.getJDA(), ctx.getGuildId(), position, name);
-            }
-            else {
-                scheduleStrategy.unMarkFinished(ctx.getJDA(), ctx.getGuildId(), position + 5, name);
-            }
+            scheduleStrategy.unMarkFinished(ctx.getJDA(), ctx.getGuildId(), position, lap, name);
         } catch (MemberHasNotAttackedException e) {
             ctx.sendError("Member has not completed an attack");
             return;
