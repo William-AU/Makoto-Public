@@ -39,6 +39,10 @@ public class DatabaseScheduleService {
         scheduleRepository.save(newSchedule);
     }
 
+    public void removeUserFromBoss(String guildId, int lap, int position, DBScheduleEntity.ScheduleUser user) {
+        scheduleRepository.deleteDBScheduleEntityByLapAndPositionAndUserId(guildId, lap, position, user.getUserId());
+    }
+
     public List<DBScheduleEntity.ScheduleUser> getUsersForBoss(String guildId, int lap, int position) {
         // In theory this can be done with a single query, but it has to be done manually because ScheduleUser is embeddable
         // and JPA doesn't work super well with embeddable classes... would be something like
@@ -53,8 +57,14 @@ public class DatabaseScheduleService {
         return users;
     }
 
-    public void toggleUserAttack(String guildId, int lap, int position, DBScheduleEntity.ScheduleUser user) throws ScheduleDoesNotExistException {
-
+    public void toggleUserAttack(String guildId, int lap, int position, DBScheduleEntity.ScheduleUser user) {
+        // Do a deep copy here to make sure removeUserFromBoss call doesn't fail - although it shouldn't be needed this might change later
+        DBScheduleEntity.ScheduleUser newUser = new DBScheduleEntity.ScheduleUser();
+        newUser.setUserId(user.getUserId());
+        newUser.setUserNick(user.getUserNick());
+        newUser.setHasAttacked(!user.isHasAttacked());
+        removeUserFromBoss(guildId, lap, position, user);
+        addUserToBoss(guildId, lap, position, newUser);
     }
 
     public void setExpectedAttacks(String guildId, int pos, int lap, int expected) {

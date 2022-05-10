@@ -38,7 +38,7 @@ public class DBScheduleEntity {
         }
 
         public ScheduleUser() {
-
+            hasAttacked = false;
         }
     }
 }

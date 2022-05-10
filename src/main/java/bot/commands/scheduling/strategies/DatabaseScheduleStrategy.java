@@ -85,42 +85,69 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
 
     }
 
+    private DBScheduleEntity.ScheduleUser getUserFromName(JDA jda, String guildId, String effectiveName) {
+        DBScheduleEntity.ScheduleUser result = new DBScheduleEntity.ScheduleUser();
+        Member discordMember = jda.getGuildById(guildId).getMembersByEffectiveName(effectiveName, false).get(0);
+        result.setUserId(discordMember.getId());
+        result.setUserNick(discordMember.getNickname());
+        return result;
+    }
+
     @Override
     public void addAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
-        DBScheduleEntity.ScheduleUser user = new DBScheduleEntity.ScheduleUser();
-        Member discordUser = jda.getGuildById(guildId).getMembersByName(name, false).get(0);
-        user.setUserId(discordUser.getId());
-        user.setUserNick(discordUser.getNickname());
+        DBScheduleEntity.ScheduleUser user = getUserFromName(jda, guildId, name);
         user.setHasAttacked(false);
-        //scheduleService.addUserToBoss();
-
+        scheduleService.addUserToBoss(guildId, lap, position, user);
     }
 
     @Override
     public void removeAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberIsNotAttackingException {
-
+        DBScheduleEntity.ScheduleUser user = getUserFromName(jda, guildId, name);
+        scheduleService.removeUserFromBoss(guildId, lap, position, user);
     }
 
     @Override
     public void markFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasAlreadyAttackedException, MemberIsNotAttackingException {
-
+        List<DBScheduleEntity.ScheduleUser> usersForBoss = scheduleService.getUsersForBoss(guildId, lap, position);
+        DBScheduleEntity.ScheduleUser newUser = getUserFromName(jda, guildId, name);
+        Boolean hasAttacked = null; // Sneaky ternary :)
+        for (DBScheduleEntity.ScheduleUser user : usersForBoss) {
+            if (user.getUserId().equals(newUser.getUserId())) {
+                hasAttacked = user.isHasAttacked();
+            }
+        }
+        if (hasAttacked == null) throw new MemberIsNotAttackingException();
+        if (hasAttacked) throw new MemberHasAlreadyAttackedException();
+        scheduleService.toggleUserAttack(guildId, position, lap, newUser);
     }
 
     @Override
     public void unMarkFinished(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberHasNotAttackedException {
-
+        List<DBScheduleEntity.ScheduleUser> usersForBoss = scheduleService.getUsersForBoss(guildId, lap, position);
+        DBScheduleEntity.ScheduleUser newUser = getUserFromName(jda, guildId, name);
+        Boolean hasAttacked = null; // Sneaky ternary :)
+        for (DBScheduleEntity.ScheduleUser user : usersForBoss) {
+            if (user.getUserId().equals(newUser.getUserId())) {
+                hasAttacked = user.isHasAttacked();
+            }
+        }
+        if (hasAttacked == null) throw new MemberHasNotAttackedException();
+        if (!hasAttacked) throw new MemberHasNotAttackedException();
+        scheduleService.toggleUserAttack(guildId, position, lap, newUser);
     }
 
     /**
      * Checks if a given user is currently signed up for the current boss of the guild
+     * @deprecated only used for old input based attack validation, this is no longer used and no method should ever call this
      *
      * @param jda     The discord JDA
      * @param guildId GuildID of the user
-     * @param user    The display name of the user
+     * @param name    The effective name of the user
      * @return true if the user is signed up for the current boss and has not completed their attack
      */
     @Override
-    public boolean isAttackingCurrentBoss(JDA jda, String guildId, String user) {
+    @Deprecated
+    public boolean isAttackingCurrentBoss(JDA jda, String guildId, String name) {
         return false;
     }
 }
