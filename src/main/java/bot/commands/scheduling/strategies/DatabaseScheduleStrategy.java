@@ -8,10 +8,15 @@ import bot.services.BossService;
 import bot.services.DatabaseScheduleService;
 import bot.services.GuildService;
 import bot.storage.models.DBScheduleEntity;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseScheduleStrategy implements ScheduleStrategy{
@@ -48,20 +53,74 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         // Treat this as a reset
         scheduleService.reset(ctx.getGuildId());
 
-        if (!channelsExist(ctx)) {
+        if (channelsDoNotExist(ctx)) {
             createChannels(ctx);
+        } else {
+            clearChannels(ctx);
+        }
+        initBossChannels(ctx);
+    }
+
+    private void initBossChannels(ICommandContext ctx) {
+        Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
+        List<TextChannel> channels = category.getTextChannels();
+        for (int i = 1; i <= 5; i++) {
+            channels.get(i).sendMessageEmbeds(createBossEmbed(ctx, i, 1)).queue();
+            channels.get(i).sendMessageEmbeds(createBossEmbed(ctx, i, 2)).queue();
         }
     }
 
-    private boolean channelsExist(ICommandContext ctx) {
+    @NotNull
+    private MessageEmbed createBossEmbed(ICommandContext ctx, int bossPosition, int lap) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("Lap: " + lap);
+        List<DBScheduleEntity.ScheduleUser> users = scheduleService.getUsersForBoss(ctx.getGuildId(), lap, bossPosition);
+        StringBuilder attackersSB = new StringBuilder();
+        StringBuilder attackedSB = new StringBuilder();
+        String attackingPrefix = "";
+        String attackedPrefix = "";
+        for (DBScheduleEntity.ScheduleUser user : users) {
+            if (user.isHasAttacked()) {
+                attackedSB.append(attackingPrefix).append(user.getUserNick());
+                attackingPrefix = ", ";
+            } else {
+                attackersSB.append(attackedPrefix).append(user.getUserNick());
+                attackedPrefix = ", ";
+            }
+        }
+        eb.addField("Attacking", attackersSB.toString(), false);
+        eb.addField("Attacked", attackedSB.toString(), false);
+        return eb.build();
+    }
+
+    private void clearChannels(ICommandContext ctx) {
+        Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
+        category.getTextChannels().forEach(channel ->
+                channel.getHistory()
+                        .retrievePast(100)
+                        .queue(messages ->
+                                messages.forEach(message ->
+                                        message.delete().queue())));
+    }
+
+    private boolean channelsDoNotExist(ICommandContext ctx) {
         List<Category> categories = ctx.getGuild().getCategories();
         for (Category category : categories) {
-            if (category.getName().equals(BotConstants.SCHEDULING_CATEGORY_NAME)) return true;
+            if (category.getName().equals(BotConstants.SCHEDULING_CATEGORY_NAME)) return false;
         }
-        return false;
+        return true;
     }
 
     private void createChannels(ICommandContext ctx) {
+        Category category = ctx.getGuild().createCategory(BotConstants.SCHEDULING_CATEGORY_NAME).complete();
+        category.createTextChannel(BotConstants.SCHEDULING_CHANNEL_NAME).complete();
+        category.createTextChannel("boss_1").complete();
+        category.createTextChannel("boss_2").complete();
+        category.createTextChannel("boss_3").complete();
+        category.createTextChannel("boss_4").complete();
+        category.createTextChannel("boss_5").complete();
+
+        /* Removed for now because of race condition, kept since the complete() method could potentially make things annoying later on
         ctx.getGuild().createCategory(BotConstants.SCHEDULING_CATEGORY_NAME).queue(category -> {
             category.createTextChannel(BotConstants.SCHEDULING_CHANNEL_NAME).queue();
             category.createTextChannel("boss_1").queue();
@@ -70,11 +129,12 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
             category.createTextChannel("boss_4").queue();
             category.createTextChannel("boss_5").queue();
         });
+         */
     }
 
     @Override
     public void deleteSchedule(ICommandContext ctx) {
-        if (!channelsExist(ctx)) return;;
+        if (channelsDoNotExist(ctx)) return;;
         Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, true).get(0);
         category.getTextChannels().forEach(channel -> channel.delete().queue());
         category.delete().queue();
