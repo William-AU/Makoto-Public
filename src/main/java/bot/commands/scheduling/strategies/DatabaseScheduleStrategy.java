@@ -2,12 +2,15 @@ package bot.commands.scheduling.strategies;
 
 import bot.commands.framework.ICommandContext;
 import bot.common.BotConstants;
+import bot.common.CBUtils;
 import bot.exceptions.*;
 import bot.exceptions.schedule.ScheduleException;
 import bot.services.BossService;
 import bot.services.DatabaseScheduleService;
 import bot.services.GuildService;
+import bot.storage.models.BossEntity;
 import bot.storage.models.DBScheduleEntity;
+import bot.storage.models.GuildEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Category;
@@ -52,13 +55,80 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     public void createSchedule(ICommandContext ctx) throws ScheduleException {
         // Treat this as a reset
         scheduleService.reset(ctx.getGuildId());
+        bossService.initNewBoss(ctx.getGuildId());
 
         if (channelsDoNotExist(ctx)) {
             createChannels(ctx);
         } else {
             clearChannels(ctx);
         }
+        initScheduleChannel(ctx);
         initBossChannels(ctx);
+    }
+
+    private void initScheduleChannel(ICommandContext ctx) {
+        Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
+        List<TextChannel> channels = category.getTextChannels();
+        for (TextChannel channel : channels) {
+            if (channel.getName().equals(BotConstants.SCHEDULING_CHANNEL_NAME)) {
+                channel.sendMessageEmbeds(createScheduleEmbeds(ctx, 1, 2)).queue();
+                return;
+            }
+        }
+    }
+
+    private List<MessageEmbed> createScheduleEmbeds(ICommandContext ctx, int startingLap, int numberOfLaps) {
+        List<MessageEmbed> result = new ArrayList<>();
+        EmbedBuilder title = new EmbedBuilder();
+        GuildEntity guildEntity = guildService.getGuild(ctx.getGuildId());
+        title.setTitle("Scheduling for " + ctx.getGuild().getName());
+        title.setDescription("This channel will contain an overview of all current bosses, as well as what " +
+                "members plan to attack or have alreadt attacked." +
+                "To queue up for an attack, use the generated channels `#boss_1` to `#boss_5`." +
+                "Admins can manually add or remove members using the commands `!addspot <@user> <position> <lap>, " +
+                "`!removespot <@user> <position> <lap>`, and `!completespot <@user> <position> <lap>`." +
+                "The schedule does not automatically update, and must be manually updated using `!nextboss`");
+
+        result.add(title.build());
+        for (int i = 0; i < numberOfLaps; i++) {
+            EmbedBuilder lap = new EmbedBuilder();
+            for (int j = 0; j < 5; j++) {
+                BossEntity currentBoss = guildEntity.getBoss();
+                StringBuilder titleString = new StringBuilder();
+                BossEntity boss = bossService.getBossFromLapAndPosition(startingLap + i, j + 1);
+                titleString.append(boss.getName());
+                if (startingLap + i == guildEntity.getLap() && currentBoss.getPosition() == (j + 1)) {
+                    titleString.append(" __Current boss__");
+                }
+                List<DBScheduleEntity.ScheduleUser> usersForBoss = scheduleService.getUsersForBoss(ctx.getGuildId(), startingLap + i, j);
+                StringBuilder attacking = new StringBuilder();
+                StringBuilder attacked = new StringBuilder();
+                String attackingPrefix = "";
+                String attackedPrefix = "";
+                for (DBScheduleEntity.ScheduleUser user : usersForBoss) {
+                    if (user.isHasAttacked()) {
+                        attacked.append(attackedPrefix)
+                                .append("~~")
+                                .append(user.getUserNick())
+                                .append("~~");
+                        attackedPrefix = ", ";
+                    } else {
+                        attacking.append(attackingPrefix)
+                                .append(user.getUserNick());
+                        attackingPrefix = ", ";
+                    }
+                }
+                StringBuilder fullBody = new StringBuilder();
+                fullBody.append("Attacking\n")
+                        .append(attacking.toString())
+                        .append("\n")
+                        .append("Attacked\n")
+                        .append(attacked.toString());
+                lap.addField(titleString.toString(), fullBody.toString(), false);
+            }
+            result.add(lap.build());
+        }
+        return result;
     }
 
     private void initBossChannels(ICommandContext ctx) {

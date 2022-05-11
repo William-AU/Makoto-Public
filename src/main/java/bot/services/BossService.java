@@ -133,6 +133,7 @@ public class BossService {
 
     public BossEntity getBossFromLapAndPosition(int lap, int position) {
         int stage = CBUtils.getStageFromLap(lap);
+        BossEntity res = bossRepository.findBossEntityByStageAndPosition(stage, position);
         return bossRepository.findBossEntityByStageAndPosition(stage, position);
     }
 }
