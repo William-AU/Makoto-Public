@@ -45,6 +45,7 @@ public class DBScheduleEntity {
         }
 
         public void setUserNick(String userNick) {
+            System.out.println("SETTING USER NICK: " + userNick);
             String emojiRegex = "[^\\p{L}\\p{N}\\p{P}\\p{Z}]";
             Pattern emojiPattern = Pattern.compile(emojiRegex, Pattern.UNICODE_CHARACTER_CLASS);
             Matcher emojiMatcher = emojiPattern.matcher(userNick);

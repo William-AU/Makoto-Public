@@ -46,6 +46,7 @@ public class DetachedScheduleButtonListener extends ListenerAdapter implements I
         }
         System.out.println("BUTTON CLICKED WITH ID: " + button.getId());
         event.deferReply(true).queue();
+        String name = member.getEffectiveName();
         try {
             switch (type) {
                 case JOIN -> {

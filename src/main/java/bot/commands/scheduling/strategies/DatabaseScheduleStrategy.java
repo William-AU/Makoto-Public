@@ -302,17 +302,22 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     }
 
     private DBScheduleEntity.ScheduleUser getUserFromName(JDA jda, String guildId, String effectiveName) {
+        System.out.println("GETTING USER FROM NAME, effectiveName: " + effectiveName);
         DBScheduleEntity.ScheduleUser result = new DBScheduleEntity.ScheduleUser();
         Member discordMember = jda.getGuildById(guildId).getMembersByEffectiveName(effectiveName, false).get(0);
+        System.out.println("MEMBER FOUND: " + discordMember);
         result.setUserId(discordMember.getId());
-        result.setUserNick(discordMember.getNickname());
+        String nick = discordMember.getNickname();
+        if (nick == null) nick = effectiveName;
+        result.setUserNick(nick);
         return result;
     }
 
     @Override
     public void addAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
-        System.out.println("ADDING ATTACKER TO POS:" + position + " LAP:" + lap);
+        System.out.println("ADDING ATTACKER TO POS:" + position + " LAP:" + lap + " WITH NAME: " + name);
         DBScheduleEntity.ScheduleUser user = getUserFromName(jda, guildId, name);
+        System.out.println("USER: " + user);
         user.setHasAttacked(false);
         if (scheduleService.isAttackingBoss(guildId, lap, position, user)) throw new MemberAlreadyExistsException();
         scheduleService.addUserToBoss(guildId, lap, position, user);
