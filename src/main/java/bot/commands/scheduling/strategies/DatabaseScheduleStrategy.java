@@ -147,7 +147,7 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
                     attackingPrefix = ", ";
                 }
                 StringBuilder fullBody = new StringBuilder();
-                fullBody.append("__Attacking__\n")
+                fullBody //.append("__Attacking__\n")
                         .append(attacking.toString());
                         //.append("\n")
                         //.append("Attacked\n")
