@@ -91,8 +91,8 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         title.setDescription("This channel will contain an overview of all current bosses, as well as what " +
                 "members plan to attack or have already attacked." +
                 "To queue up for an attack, use the generated channels `#boss_1` to `#boss_5`." +
-                "Admins can manually add or remove members using the commands `!addspot <@user> <position> <lap>`, " +
-                "`!removespot <@user> <position> <lap>`, and `!completespot <@user> <position> <lap>`." +
+                "Admins can manually add or remove members using the commands `!addspot <@user> <position> <lap>`." +
+                "To change the current boss shown use `!nextboss`." +
                 "The schedule does not automatically update, and must be manually updated using `!nextboss`." +
                 "\nTo set the expected number of attacks for a boss use `!expected <position> <expected attacks>`." +
                 "\nThe amount of laps shown at once in this channel can be changed using `!lapsToShow <amount>`, " +
