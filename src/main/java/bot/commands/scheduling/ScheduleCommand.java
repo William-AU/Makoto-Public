@@ -29,7 +29,7 @@ public class ScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        if (scheduleStrategy.hasActiveSchedule(ctx.getGuildId())) {
+        if (scheduleStrategy.hasActiveSchedule(ctx.getJDA(), ctx.getGuildId())) {
             ctx.sendError("A schedule is already tracking this boss, use `!resetschedule`");
             return;
         }

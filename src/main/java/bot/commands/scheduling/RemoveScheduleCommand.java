@@ -25,7 +25,7 @@ public class RemoveScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        if (!scheduleStrategy.hasActiveSchedule(ctx.getGuildId())) {
+        if (!scheduleStrategy.hasActiveSchedule(ctx.getJDA(), ctx.getGuildId())) {
             ctx.sendError("There is no schedule for the specified boss");
             return;
         }

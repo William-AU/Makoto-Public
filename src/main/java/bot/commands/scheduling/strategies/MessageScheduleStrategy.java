@@ -47,7 +47,7 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
      * @return true if a schedule exists, false otherwise
      */
     @Override
-    public boolean hasActiveSchedule(String guildId) {
+    public boolean hasActiveSchedule(JDA jda, String guildId) {
         return messageBasedScheduleService.hasActiveScheduleForBoss(guildId);
     }
 

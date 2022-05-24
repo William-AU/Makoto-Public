@@ -33,7 +33,7 @@ public interface ScheduleStrategy {
      * @param guildId String ID of the guild
      * @return true if a schedule exists, false otherwise
      */
-    boolean hasActiveSchedule(String guildId);
+    boolean hasActiveSchedule(JDA jda, String guildId);
 
     /**
      * Creates a new schedule, this will remove any previous schedule WITHOUT WARNING

@@ -36,7 +36,7 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
-    public boolean hasActiveSchedule(String guildId) {
+    public boolean hasActiveSchedule(JDA jda, String guildId) {
         return messageBasedScheduleService.hasActiveScheduleForBoss(guildId);
     }
 
