@@ -12,6 +12,7 @@ import bot.commands.scheduling.strategies.ScheduleStrategy;
 import bot.commands.tracking.TrackingStrategy;
 import bot.listeners.CommandListener;
 import bot.listeners.ConfirmButtonListener;
+import bot.listeners.DetachedScheduleButtonListener;
 import bot.listeners.ScheduleButtonListener;
 import bot.services.*;
 import net.dv8tion.jda.api.JDA;
@@ -80,7 +81,7 @@ public class BotConfig {
 
 
         jdaBuilder.addEventListeners(new CommandListener(commands));
-        jdaBuilder.addEventListeners(new ScheduleButtonListener(scheduleStrategy(messageBasedScheduleService, guildService, bossService), guildService));
+        jdaBuilder.addEventListeners(new DetachedScheduleButtonListener(scheduleStrategy(messageBasedScheduleService, guildService, bossService), guildService));
         jdaBuilder.addEventListeners(new ConfirmButtonListener(scheduleStrategy(messageBasedScheduleService, guildService, bossService), guildService, bossService));
 
         return jdaBuilder.build();

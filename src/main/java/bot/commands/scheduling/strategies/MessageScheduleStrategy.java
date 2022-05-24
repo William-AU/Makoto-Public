@@ -310,6 +310,11 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         }
     }
 
+    @Override
+    public void resetSchedule(ICommandContext ctx) {
+
+    }
+
     private String createMessage(String guildId, String guildName, Map<Integer, List<String>> positionAttackingMap, Map<Integer, List<String>> positionAttackedMap) {
         StringBuilder sb = new StringBuilder();
         GuildEntity guild = guildService.getGuild(guildId);
@@ -583,5 +588,10 @@ public class MessageScheduleStrategy implements ScheduleStrategy {
         Map<Integer, List<String>> attackingMap = extractMembers(jda, guildId).get(ATTACKING);
         int position = guild.getBoss().getPosition();
         return attackingMap.get(position).contains(user);
+    }
+
+    @Override
+    public void setNextBoss(CommandContext ctx) {
+
     }
 }

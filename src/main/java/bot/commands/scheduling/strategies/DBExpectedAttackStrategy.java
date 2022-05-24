@@ -11,7 +11,7 @@ public class DBExpectedAttackStrategy implements ExpectedAttackStrategy {
     }
 
     @Override
-    public void setExpectedAttacks(String guildId, int pos, int lap, int expected) {
-        scheduleService.setExpectedAttacks(guildId, pos, lap, expected);
+    public void setExpectedAttacks(String guildId, int pos, int expected) {
+        scheduleService.setExpectedAttacks(guildId, pos, expected);
     }
 }

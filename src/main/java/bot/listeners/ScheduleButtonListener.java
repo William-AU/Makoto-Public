@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
-public class ScheduleButtonListener extends ListenerAdapter {
+public class ScheduleButtonListener extends ListenerAdapter implements IScheduleButtonListener {
     private final ScheduleStrategy scheduleStrategy;
     private final GuildService guildService;
 

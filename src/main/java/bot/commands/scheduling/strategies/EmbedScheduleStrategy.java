@@ -217,6 +217,11 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
     }
 
     @Override
+    public void resetSchedule(ICommandContext ctx) {
+
+    }
+
+    @Override
     public void deleteSchedule(ICommandContext ctx) {
         // TODO: Throw exception if schedule doesn't exist
         MessageScheduleEntity messageScheduleEntity = messageBasedScheduleService.getScheduleByGuildId(ctx.getGuildId());
@@ -297,5 +302,10 @@ public class EmbedScheduleStrategy implements ScheduleStrategy {
         Map<Integer, List<String>> attackingMap = extractMembers(jda, guildId).get(ATTACKING);
         int position = guild.getBoss().getPosition();
         return attackingMap.get(position).contains(user);
+    }
+
+    @Override
+    public void setNextBoss(CommandContext ctx) {
+
     }
 }

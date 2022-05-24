@@ -1,8 +1,11 @@
 package bot.commands.scheduling.strategies;
 
+import bot.commands.framework.CommandContext;
 import bot.commands.framework.ICommandContext;
+import bot.commands.framework.ManualCommandContext;
 import bot.common.BotConstants;
 import bot.common.CBUtils;
+import bot.common.ScheduleButtonType;
 import bot.exceptions.*;
 import bot.exceptions.schedule.ScheduleException;
 import bot.services.BossService;
@@ -13,10 +16,8 @@ import bot.storage.models.DBScheduleEntity;
 import bot.storage.models.GuildEntity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     private final DatabaseScheduleService scheduleService;
     private final GuildService guildService;
     private final BossService bossService;
+    private final int NUMBER_OF_LAPS_TO_GENERATE = 3;   // TODO: Make this a config thing, just temporary for now
 
     public DatabaseScheduleStrategy(DatabaseScheduleService scheduleService, GuildService guildService, BossService bossService) {
         this.scheduleService = scheduleService;
@@ -56,12 +58,16 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         // Treat this as a reset
         scheduleService.reset(ctx.getGuildId());
         bossService.initNewBoss(ctx.getGuildId());
+        createChannels(ctx);
+        initScheduleChannel(ctx);
+        initBossChannels(ctx);
+    }
 
-        if (channelsDoNotExist(ctx)) {
-            createChannels(ctx);
-        } else {
-            clearChannels(ctx);
-        }
+    @Override
+    public void resetSchedule(ICommandContext ctx) {
+        scheduleService.reset(ctx.getGuildId());
+        bossService.initNewBoss(ctx.getGuildId());
+        clearChannels(ctx);
         initScheduleChannel(ctx);
         initBossChannels(ctx);
     }
@@ -71,7 +77,7 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         List<TextChannel> channels = category.getTextChannels();
         for (TextChannel channel : channels) {
             if (channel.getName().equals(BotConstants.SCHEDULING_CHANNEL_NAME)) {
-                channel.sendMessageEmbeds(createScheduleEmbeds(ctx, 1, 2)).queue();
+                channel.sendMessageEmbeds(createScheduleEmbeds(ctx, 1, NUMBER_OF_LAPS_TO_GENERATE)).queue();
                 return;
             }
         }
@@ -83,15 +89,17 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         GuildEntity guildEntity = guildService.getGuild(ctx.getGuildId());
         title.setTitle("Scheduling for " + ctx.getGuild().getName());
         title.setDescription("This channel will contain an overview of all current bosses, as well as what " +
-                "members plan to attack or have alreadt attacked." +
+                "members plan to attack or have already attacked." +
                 "To queue up for an attack, use the generated channels `#boss_1` to `#boss_5`." +
-                "Admins can manually add or remove members using the commands `!addspot <@user> <position> <lap>, " +
+                "Admins can manually add or remove members using the commands `!addspot <@user> <position> <lap>`, " +
                 "`!removespot <@user> <position> <lap>`, and `!completespot <@user> <position> <lap>`." +
-                "The schedule does not automatically update, and must be manually updated using `!nextboss`");
+                "The schedule does not automatically update, and must be manually updated using `!nextboss`." +
+                "\nTo set the expected number of attacks for a boss use `!expected <position> <expected attacks>`");
 
         result.add(title.build());
         for (int i = 0; i < numberOfLaps; i++) {
             EmbedBuilder lap = new EmbedBuilder();
+            lap.setTitle("Lap " + (startingLap + i));
             for (int j = 0; j < 5; j++) {
                 BossEntity currentBoss = guildEntity.getBoss();
                 StringBuilder titleString = new StringBuilder();
@@ -100,12 +108,25 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
                 if (startingLap + i == guildEntity.getLap() && currentBoss.getPosition() == (j + 1)) {
                     titleString.append(" __Current boss__");
                 }
-                List<DBScheduleEntity.ScheduleUser> usersForBoss = scheduleService.getUsersForBoss(ctx.getGuildId(), startingLap + i, j);
+                // Add the expected attacks
+                int expectedAttacks = scheduleService.getExpectedAttacks(ctx.getGuildId(), j + 1);
+                String expectedString = expectedAttacks + "";
+                if (expectedAttacks == -1) {
+                    expectedString = "?";
+                }
+                List<DBScheduleEntity.ScheduleUser> usersForBoss = scheduleService.getUsersForBoss(ctx.getGuildId(), startingLap + i, j + 1);
+                int numberOfAttackers = usersForBoss.size();
+                titleString.append(" (")
+                        .append(numberOfAttackers)
+                        .append("/")
+                        .append(expectedString)
+                        .append(")");
                 StringBuilder attacking = new StringBuilder();
                 StringBuilder attacked = new StringBuilder();
                 String attackingPrefix = "";
                 String attackedPrefix = "";
                 for (DBScheduleEntity.ScheduleUser user : usersForBoss) {
+                    /* Just don't bother tracking attacking vs attacked...
                     if (user.isHasAttacked()) {
                         attacked.append(attackedPrefix)
                                 .append("~~")
@@ -117,13 +138,17 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
                                 .append(user.getUserNick());
                         attackingPrefix = ", ";
                     }
+                     */
+                    attacking.append(attackingPrefix)
+                            .append(user.getUserNick());
+                    attackingPrefix = ", ";
                 }
                 StringBuilder fullBody = new StringBuilder();
-                fullBody.append("Attacking\n")
-                        .append(attacking.toString())
-                        .append("\n")
-                        .append("Attacked\n")
-                        .append(attacked.toString());
+                fullBody.append("__Attacking__\n")
+                        .append(attacking.toString());
+                        //.append("\n")
+                        //.append("Attacked\n")
+                        //.append(attacked.toString());
                 lap.addField(titleString.toString(), fullBody.toString(), false);
             }
             result.add(lap.build());
@@ -131,12 +156,26 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         return result;
     }
 
+    private List<Button> createButtons(ICommandContext ctx, int lap, int pos) {
+        // Format: TYPE-guildid-lap-pos
+        String joinId = ScheduleButtonType.JOIN + "-" + ctx.getGuildId() + "-" + lap + "-" + pos;
+        String leaveId = ScheduleButtonType.LEAVE + "-" + ctx.getGuildId() + "-" + lap + "-" + pos;
+        Button join = Button.primary(joinId, "Join");
+        Button leave = Button.danger(leaveId, "Leave");
+        return new ArrayList<>() {{
+            add(join);
+            add(leave);
+        }};
+    }
+
     private void initBossChannels(ICommandContext ctx) {
         Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
         List<TextChannel> channels = category.getTextChannels();
         for (int i = 1; i <= 5; i++) {
-            channels.get(i).sendMessageEmbeds(createBossEmbed(ctx, i, 1)).queue();
-            channels.get(i).sendMessageEmbeds(createBossEmbed(ctx, i, 2)).queue();
+            for (int j = 0; j < NUMBER_OF_LAPS_TO_GENERATE; j++) {
+                channels.get(i).sendMessageEmbeds(createBossEmbed(ctx, i, j + 1))
+                        .setActionRow(createButtons(ctx, j + 1, i)).queue();
+            }
         }
     }
 
@@ -150,6 +189,7 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         String attackingPrefix = "";
         String attackedPrefix = "";
         for (DBScheduleEntity.ScheduleUser user : users) {
+            /* Only one for now
             if (user.isHasAttacked()) {
                 attackedSB.append(attackingPrefix).append(user.getUserNick());
                 attackingPrefix = ", ";
@@ -157,9 +197,12 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
                 attackersSB.append(attackedPrefix).append(user.getUserNick());
                 attackedPrefix = ", ";
             }
+             */
+            attackersSB.append(attackingPrefix).append(user.getUserNick());
+            attackingPrefix = ", ";
         }
         eb.addField("Attacking", attackersSB.toString(), false);
-        eb.addField("Attacked", attackedSB.toString(), false);
+        //eb.addField("Attacked", attackedSB.toString(), false);
         return eb.build();
     }
 
@@ -206,13 +249,50 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     public void deleteSchedule(ICommandContext ctx) {
         if (channelsDoNotExist(ctx)) return;;
         Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, true).get(0);
-        category.getTextChannels().forEach(channel -> channel.delete().queue());
-        category.delete().queue();
+        category.getTextChannels().forEach(channel -> channel.delete().complete());
+        category.delete().complete();
     }
 
     @Override
-    public void updateSchedule(JDA jda, String guildId, boolean bossDead) {
+    public void updateSchedule(JDA jda, String guildId, boolean bossDead) { // Flag argument is bad
+        Category category = jda.getGuildById(guildId).getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
+        List<TextChannel> channels = category.getTextChannels();
+        int lap = guildService.getGuild(guildId).getLap();
 
+        for (TextChannel channel : channels) {
+            if (channel.getName().equals(BotConstants.SCHEDULING_CHANNEL_NAME)) {
+                channel.getHistory().retrievePast(100).queue(messages -> {
+                    ICommandContext ctx = new ManualCommandContext(jda.getGuildById(guildId), guildId, jda);
+                    messages.get(0).editMessageEmbeds(createScheduleEmbeds(ctx, lap, NUMBER_OF_LAPS_TO_GENERATE)).queue();
+                });
+            }
+            if (channel.getName().contains("boss_") && bossDead) {
+                String[] nameContent = channel.getName().split("_");
+                int channelPos = Integer.parseInt(nameContent[1]);
+                ICommandContext ctx = new ManualCommandContext(jda.getGuildById(guildId), guildId, jda);
+                // TODO: Figure out why this -1 is needed, has to be an off by one error somewhere
+                channel.sendMessageEmbeds(createBossEmbed(ctx, channelPos, lap + NUMBER_OF_LAPS_TO_GENERATE - 1))
+                        .setActionRow(createButtons(ctx, lap + NUMBER_OF_LAPS_TO_GENERATE - 1, channelPos)).queue();
+            }
+        }
+    }
+
+    private void updateEmbed(JDA jda, String guildId, int lap, int pos) {
+        String channelName = "boss_" + pos;
+        ICommandContext ctx = new ManualCommandContext(jda.getGuildById(guildId), guildId, jda);
+        jda.getGuildById(guildId).getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, true).get(0).getTextChannels().forEach(channel -> {
+            if (channel.getName().equals(channelName)) {
+                channel.getHistory().retrievePast(100).queue(messages -> {
+                    for (Message message : messages) {
+                        String title = message.getEmbeds().get(0).getTitle();
+                        if (title.contains("Lap: " + lap)) {
+                            message.editMessageEmbeds(createBossEmbed(ctx, pos, lap)).queue();
+                        }
+                    }
+                });
+            }
+        });
+        updateSchedule(jda, guildId, false);
     }
 
     private DBScheduleEntity.ScheduleUser getUserFromName(JDA jda, String guildId, String effectiveName) {
@@ -225,15 +305,20 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
 
     @Override
     public void addAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberAlreadyExistsException, MemberHasAlreadyAttackedException {
+        System.out.println("ADDING ATTACKER TO POS:" + position + " LAP:" + lap);
         DBScheduleEntity.ScheduleUser user = getUserFromName(jda, guildId, name);
         user.setHasAttacked(false);
+        if (scheduleService.isAttackingBoss(guildId, lap, position, user)) throw new MemberAlreadyExistsException();
         scheduleService.addUserToBoss(guildId, lap, position, user);
+        updateEmbed(jda, guildId, lap, position);
     }
 
     @Override
     public void removeAttacker(JDA jda, String guildId, Integer position, Integer lap, String name) throws MemberIsNotAttackingException {
         DBScheduleEntity.ScheduleUser user = getUserFromName(jda, guildId, name);
-        scheduleService.removeUserFromBoss(guildId, lap, position, user);
+        boolean removed = scheduleService.removeUserFromBoss(guildId, lap, position, user);
+        if (!removed) throw new MemberIsNotAttackingException();
+        updateEmbed(jda, guildId, lap, position);
     }
 
     @Override
@@ -279,5 +364,17 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     @Deprecated
     public boolean isAttackingCurrentBoss(JDA jda, String guildId, String name) {
         return false;
+    }
+
+    @Override
+    public void setNextBoss(CommandContext ctx) {
+        System.out.println("Setting next boss");
+        int currentPos = guildService.getBossPosition(ctx.getGuildId());
+        bossService.setNextBoss(ctx.getGuildId());
+        if (currentPos == 5) {
+            updateSchedule(ctx.getJDA(), ctx.getGuildId(), true);
+        } else {
+            updateSchedule(ctx.getJDA(), ctx.getGuildId(), false);
+        }
     }
 }

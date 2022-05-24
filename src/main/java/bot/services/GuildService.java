@@ -78,4 +78,9 @@ public class GuildService {
         guild.setCurrentHealth(newHealth);
         guildRepository.save(guild);
     }
+
+    public int getBossPosition(String guildId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        return guild.getBoss().getPosition();
+    }
 }

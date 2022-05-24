@@ -39,8 +39,22 @@ public class DatabaseScheduleService {
         scheduleRepository.save(newSchedule);
     }
 
-    public void removeUserFromBoss(String guildId, int lap, int position, DBScheduleEntity.ScheduleUser user) {
-        scheduleRepository.deleteDBScheduleEntityByLapAndPositionAndUserId(guildId, lap, position, user.getUserId());
+    /**
+     * Removes a user from a boss in the schedule database
+     * @param guildId ID of the guild
+     * @param lap the lap of the boss
+     * @param position the position of the boss
+     * @param user the user
+     * @return true if an entry was sucessfully removed, false otherwise
+     */
+    public boolean removeUserFromBoss(String guildId, int lap, int position, DBScheduleEntity.ScheduleUser user) {
+        int numberRemoved = scheduleRepository.deleteDBScheduleEntityByLapAndPositionAndUserId(guildId, lap, position, user.getUserId());
+        return numberRemoved != 0;
+    }
+
+    public boolean isAttackingBoss(String guildId, int lap, int position, DBScheduleEntity.ScheduleUser user) {
+        DBScheduleEntity entity = scheduleRepository.getScheduleByLapAndPositionAndUserId(guildId, lap, position, user.getUserId());
+        return entity != null;
     }
 
     public List<DBScheduleEntity.ScheduleUser> getUsersForBoss(String guildId, int lap, int position) {
@@ -67,19 +81,28 @@ public class DatabaseScheduleService {
         addUserToBoss(guildId, lap, position, newUser);
     }
 
-    public void setExpectedAttacks(String guildId, int pos, int lap, int expected) {
-        int stage = CBUtils.getStageFromLap(lap);
-        GuildEntity guild = guildRepository.getById(guildId);
+    public int getExpectedAttacks(String guildId, int pos) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        List<ExpectedAttacksEntity> attacks = guild.getExpectedAttacks();
+
+        for (ExpectedAttacksEntity attack : attacks) {
+            if (attack.getPos() == pos) {
+                return attack.getExpectedAttacks();
+            }
+        }
+        return -1;
+    }
+
+    public void setExpectedAttacks(String guildId, int pos, int expected) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         List<ExpectedAttacksEntity> oldAttacks = guild.getExpectedAttacks();
         ExpectedAttacksEntity newAttack = new ExpectedAttacksEntity();
         newAttack.setPos(pos);
-        newAttack.setStage(stage);
         newAttack.setGuildEntity(guild);
+        newAttack.setExpectedAttacks(expected);
 
         for (ExpectedAttacksEntity attack : oldAttacks) {
-            boolean stageMatches = attack.getStage() == newAttack.getStage();
-            boolean posMatches = attack.getPos() == newAttack.getPos();
-            if (stageMatches && posMatches) {
+            if (attack.getPos() == newAttack.getPos()) {
                 oldAttacks.remove(attack);
                 break;
             }

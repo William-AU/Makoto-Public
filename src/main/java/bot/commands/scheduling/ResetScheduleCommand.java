@@ -29,14 +29,7 @@ public class ResetScheduleCommand implements ICommand {
             ctx.permissionsError();
             return;
         }
-        ctx.getChannel().sendMessage("This command has been changed from previous versions, this will remove all current attacks, " +
-                "in most cases you are looking for `!resyncschedule` instead").setActionRow(createButtons()).queue();
-        try {
-            // This shouldn't actually throw anything, because this exception would have been thrown when the schedule was originally created
-            scheduleStrategy.createSchedule(ctx);
-        } catch (ScheduleException e) {
-            e.printStackTrace();
-        }
+        ctx.getChannel().sendMessage("Warning, this will reset the tracking for the CB, meaning all progress will be lost! Are you sure?").setActionRow(createButtons()).queue();
         ctx.reactPositive();
     }
 

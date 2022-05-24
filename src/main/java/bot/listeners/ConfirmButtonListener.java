@@ -28,11 +28,17 @@ public class ConfirmButtonListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        event.deferReply(true).queue();
+        System.out.println("LISTENING TO EVENTS");
         Button button = event.getButton();
         String buttonId = button.getId();
         String[] split = buttonId.split("-");
-        ConfirmButtonType type = ConfirmButtonType.valueOf(split[1]);
+        ConfirmButtonType type;
+        try {
+            type = ConfirmButtonType.valueOf(split[1]);
+        } catch (IllegalArgumentException wrongButton) {
+            return;
+        }
+        event.deferReply(true).queue();
         if (type.equals(ConfirmButtonType.ABORT)) {
             event.getMessage().delete().queue();
             event.getHook().sendMessage("Aborted").queue();
@@ -48,7 +54,9 @@ public class ConfirmButtonListener extends ListenerAdapter {
 
     private void handleHardReset(ButtonInteractionEvent event) {
         ManualCommandContext ctx = new ManualCommandContext(event.getGuild(), event.getGuild().getId(), event.getJDA());
-        scheduleStrategy.deleteSchedule(ctx);
+        scheduleStrategy.resetSchedule(ctx);
+
+        event.getHook().sendMessage("Success!").queue();
     }
 
     private void handleLapOverride(ButtonInteractionEvent event, String[] split) {

@@ -31,31 +31,29 @@ public class SetExpectedAttacksCommand implements ICommand {
         }
         String content = ctx.getMessage().getContentRaw();
         String[] contentSplit = content.split(" ");
-        if (contentSplit.length != 4) {
+        if (contentSplit.length != 3) {
             sendArgumentError(ctx);
             return;
         }
         String posString = contentSplit[1];
-        String lapString = contentSplit[2];
-        String expectedString = contentSplit[3];
+        String expectedString = contentSplit[2];
 
         int pos, lap, expected;
         try {
             pos = Integer.parseInt(posString);
-            lap = Integer.parseInt(lapString);
             expected = Integer.parseInt(expectedString);
         } catch (NumberFormatException ignored) {
             sendArgumentError(ctx);
             return;
         }
 
-        expectedAttackStrategy.setExpectedAttacks(ctx.getGuildId(), pos, lap, expected);
+        expectedAttackStrategy.setExpectedAttacks(ctx.getGuildId(), pos, expected);
         scheduleStrategy.updateSchedule(ctx.getJDA(), ctx.getGuildId(), false);
         ctx.reactPositive();
     }
 
     private void sendArgumentError(CommandContext ctx) {
-        ctx.sendError("Incorrect arguments, please use `!setexpected <boss position> <boss lap> <expected attacks>");
+        ctx.sendError("Incorrect arguments, please use `!setexpected <boss position> <expected attacks>`");
     }
 
     @Override

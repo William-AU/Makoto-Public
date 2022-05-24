@@ -41,6 +41,8 @@ public interface ScheduleStrategy {
      */
     void createSchedule(ICommandContext ctx) throws ScheduleException;
 
+    void resetSchedule(ICommandContext ctx);
+
     void deleteSchedule(ICommandContext ctx);
 
     void updateSchedule(JDA jda, String guildId, boolean bossDead);
@@ -123,4 +125,6 @@ public interface ScheduleStrategy {
      * @return true if the user is signed up for the current boss and has not completed their attack
      */
     boolean isAttackingCurrentBoss(JDA jda, String guildId, String user);
+
+    void setNextBoss(CommandContext ctx);
 }
