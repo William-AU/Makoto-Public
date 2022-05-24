@@ -83,4 +83,16 @@ public class GuildService {
         GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
         return guild.getBoss().getPosition();
     }
+
+    public void setMessagesToDisplay(String guildId, int messagesToDisplay) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        guild.setMessagesToDisplay(messagesToDisplay);
+        guildRepository.save(guild);
+    }
+
+    public int getMessagesToDisplay(String guildId) {
+        GuildEntity guild = guildRepository.getGuildEntityByGuildId(guildId);
+        if (guild.getMessagesToDisplay() == null) return 2;
+        return guild.getMessagesToDisplay();
+    }
 }

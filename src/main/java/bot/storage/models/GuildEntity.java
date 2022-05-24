@@ -33,6 +33,8 @@ public class GuildEntity {
 
     private Integer lap;
 
+    private Integer messagesToDisplay;
+
     @ManyToMany
     private List<ExpectedAttacksEntity> expectedAttacks;
 

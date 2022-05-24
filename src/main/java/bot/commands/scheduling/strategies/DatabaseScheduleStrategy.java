@@ -27,7 +27,6 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
     private final DatabaseScheduleService scheduleService;
     private final GuildService guildService;
     private final BossService bossService;
-    private final int NUMBER_OF_LAPS_TO_GENERATE = 3;   // TODO: Make this a config thing, just temporary for now
 
     public DatabaseScheduleStrategy(DatabaseScheduleService scheduleService, GuildService guildService, BossService bossService) {
         this.scheduleService = scheduleService;
@@ -77,7 +76,8 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         List<TextChannel> channels = category.getTextChannels();
         for (TextChannel channel : channels) {
             if (channel.getName().equals(BotConstants.SCHEDULING_CHANNEL_NAME)) {
-                channel.sendMessageEmbeds(createScheduleEmbeds(ctx, 1, NUMBER_OF_LAPS_TO_GENERATE)).queue();
+                int lapsToGenerate = guildService.getMessagesToDisplay(ctx.getGuildId());
+                channel.sendMessageEmbeds(createScheduleEmbeds(ctx, 1, lapsToGenerate)).queue();
                 return;
             }
         }
@@ -94,7 +94,10 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
                 "Admins can manually add or remove members using the commands `!addspot <@user> <position> <lap>`, " +
                 "`!removespot <@user> <position> <lap>`, and `!completespot <@user> <position> <lap>`." +
                 "The schedule does not automatically update, and must be manually updated using `!nextboss`." +
-                "\nTo set the expected number of attacks for a boss use `!expected <position> <expected attacks>`");
+                "\nTo set the expected number of attacks for a boss use `!expected <position> <expected attacks>`." +
+                "\nThe amount of laps shown at once in this channel can be changed using `!lapsToShow <amount>`, " +
+                "this should never be changed in the middle of a CB. After setting the laps to show, please use `!resetschedule`" +
+                "to avoid unexpected behaviour");
 
         result.add(title.build());
         for (int i = 0; i < numberOfLaps; i++) {
@@ -172,7 +175,8 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
         Category category = ctx.getGuild().getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
         List<TextChannel> channels = category.getTextChannels();
         for (int i = 1; i <= 5; i++) {
-            for (int j = 0; j < NUMBER_OF_LAPS_TO_GENERATE; j++) {
+            int lapsToGenerate = guildService.getMessagesToDisplay(ctx.getGuildId());
+            for (int j = 0; j < lapsToGenerate; j++) {
                 channels.get(i).sendMessageEmbeds(createBossEmbed(ctx, i, j + 1))
                         .setActionRow(createButtons(ctx, j + 1, i)).queue();
             }
@@ -263,7 +267,8 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
             if (channel.getName().equals(BotConstants.SCHEDULING_CHANNEL_NAME)) {
                 channel.getHistory().retrievePast(100).queue(messages -> {
                     ICommandContext ctx = new ManualCommandContext(jda.getGuildById(guildId), guildId, jda);
-                    messages.get(0).editMessageEmbeds(createScheduleEmbeds(ctx, lap, NUMBER_OF_LAPS_TO_GENERATE)).queue();
+                    int lapsToGenerate = guildService.getMessagesToDisplay(ctx.getGuildId());
+                    messages.get(0).editMessageEmbeds(createScheduleEmbeds(ctx, lap, lapsToGenerate)).queue();
                 });
             }
             if (channel.getName().contains("boss_") && bossDead) {
@@ -271,8 +276,9 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
                 int channelPos = Integer.parseInt(nameContent[1]);
                 ICommandContext ctx = new ManualCommandContext(jda.getGuildById(guildId), guildId, jda);
                 // TODO: Figure out why this -1 is needed, has to be an off by one error somewhere
-                channel.sendMessageEmbeds(createBossEmbed(ctx, channelPos, lap + NUMBER_OF_LAPS_TO_GENERATE - 1))
-                        .setActionRow(createButtons(ctx, lap + NUMBER_OF_LAPS_TO_GENERATE - 1, channelPos)).queue();
+                int lapsToGenerate = guildService.getMessagesToDisplay(ctx.getGuildId());
+                channel.sendMessageEmbeds(createBossEmbed(ctx, channelPos, lap + lapsToGenerate - 1))
+                        .setActionRow(createButtons(ctx, lap + lapsToGenerate - 1, channelPos)).queue();
             }
         }
     }
