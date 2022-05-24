@@ -42,8 +42,8 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
      */
     @Override
     public boolean hasActiveSchedule(JDA jda, String guildId) {
-        Category category = jda.getGuildById(guildId).getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false).get(0);
-        return category != null;
+        List<Category> categoryList = jda.getGuildById(guildId).getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false);
+        return categoryList.size() != 0;
     }
 
 
