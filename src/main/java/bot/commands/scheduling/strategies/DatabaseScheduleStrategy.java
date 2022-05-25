@@ -41,9 +41,9 @@ public class DatabaseScheduleStrategy implements ScheduleStrategy{
      * @return true if a schedule exists, false otherwise
      */
     @Override
-    public boolean hasActiveSchedule(String guildId) {
-        // There will always be a schedule, it is just sometimes empty, but that doesn't matter
-        return true;
+    public boolean hasActiveSchedule(JDA jda, String guildId) {
+        List<Category> categoryList = jda.getGuildById(guildId).getCategoriesByName(BotConstants.SCHEDULING_CATEGORY_NAME, false);
+        return categoryList.size() != 0;
     }
 
 
