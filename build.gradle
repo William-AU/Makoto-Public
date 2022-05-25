@@ -1,0 +1,43 @@
+plugins {
+    id 'org.springframework.boot' version '2.6.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '2.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.1'
+
+    // Database stuff
+    runtimeOnly 'mysql:mysql-connector-java'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Discord
+    implementation("net.dv8tion:JDA:5.0.0-alpha.9")
+
+    compile 'com.google.api-client:google-api-client:1.30.4'
+    compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.6'
+    compile 'com.google.apis:google-api-services-sheets:v4-rev581-1.25.0'
+
+    // For when we want to actually add makoto pictures
+    implementation 'com.github.Kodehawa:imageboard-api:1907d46a98'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+test {
+    useJUnitPlatform()
+}

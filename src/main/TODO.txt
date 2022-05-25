@@ -1,0 +1,8 @@
+GENERAL
+    Fix the need to use !startcb before !addbattle commands work
+
+SCHEDULE
+    Add the ability to override current the current active boss until damage has caught up
+    Display the correct boss names ;_;
+    BUG: Adding a battle that kills a boss does not mark the user as having completed an attack
+    Add list of current attackers to boss channels
