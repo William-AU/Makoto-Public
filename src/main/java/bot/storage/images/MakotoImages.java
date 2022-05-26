@@ -26,7 +26,7 @@ public class MakotoImages {
         add("https://img3.gelbooru.com//images/e2/13/e2131a9a57ab1bd23450c1e0624750f7.png");
         add("https://img3.gelbooru.com/images/f6/78/f6784329a7f34a72e2234c321f27bac2.jpg");
         add("https://img3.gelbooru.com/images/00/3a/003a44eb79c61b76e6873d2b04aa605e.png");
-        add("https://img3.gelbooru.com//images/da/41/da4139d1951a599b7a77625c8430e836.png");
+        //add("https://img3.gelbooru.com//images/da/41/da4139d1951a599b7a77625c8430e836.png");
         add("https://img3.gelbooru.com//images/f8/d9/f8d96de2208fe42d78dd56e40b46d195.jpg");
         add("https://img3.gelbooru.com//images/dd/34/dd3470b58b229eef574b42211fc64a1b.png");
         add("https://img3.gelbooru.com/images/4e/d4/4ed43c4e4196ea29708253d6c8b07798.jpg");
