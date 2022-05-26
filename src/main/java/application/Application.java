@@ -6,8 +6,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+<<<<<<< HEAD
 import java.util.Arrays;
 
+=======
+>>>>>>> 86f92746586d41ea56c3febc2314d8d028731b57
 @ComponentScan(basePackages = "bot")
 @EnableJpaRepositories("bot.storage")
 @EntityScan("bot/storage")
