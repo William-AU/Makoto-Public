@@ -129,7 +129,6 @@ public class SheetRepository {
         final List<ArrayList<Object>> battle = Collections.singletonList(new ArrayList<>());
         battle.get(0).add(damage);
         List<List<Object>> readResults = readFromSpreadsheet(guild.getSpreadsheetId(), sheetName + sheetTable, "ROWS");
-
         int index = readResults.stream().map(objects -> objects.get(0)).collect(Collectors.toList()).indexOf(userId);
         int columnIndex = IntStream.range(0, readResults.size()).filter(i -> readResults.get(index).get(i).toString().isEmpty()).findFirst().orElse(-1);
         String range = sheetName + "!" + findWriteColumn(columnIndex, false) + (index + 3);
