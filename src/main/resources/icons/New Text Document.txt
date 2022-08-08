@@ -1,9 +1,0 @@
-@ECHO OFF
-PUSHD .
-FOR /R %%d IN (.) DO (
-cd "%%d"
-IF EXIST *.webp@w400(
-REN *.webp@w400 *.png
-)
-)
-POPD
