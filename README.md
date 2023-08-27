@@ -1,5 +1,7 @@
 # Deprecation Notice
+On April 30, 2023 Crunchyroll shut down the global version of Priconne, as CB tracking and coordination sees little use in JP, there is little reason to keep this project running.
 
+Thank you to everyone who helped test and support the development. If you or your community sees a use for this project in the future, feel free to reach out on [the discord](https://discord.gg/eJJeq7EUCj). 
 
 # Makoto-Public
 
