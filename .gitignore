@@ -8,6 +8,7 @@ build/
 ### Tokens ###
 !**/src/main/resources/application.properties
 !**/src/main/resources/credentials.json
+src/main/resources/application.properties
 
 ### STS ###
 .apt_generated
