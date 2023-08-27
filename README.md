@@ -1,3 +1,6 @@
+# Deprecation Notice
+
+
 # Makoto-Public
 
 This repository contains all non sensitive code for the Princess Connect Re:Dive bot Makoto Bot.
