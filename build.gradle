@@ -25,7 +25,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Discord
-    implementation("net.dv8tion:JDA:5.0.0-alpha.9")
+    implementation("net.dv8tion:JDA:5.0.0-beta.5")
 
     implementation 'com.google.api-client:google-api-client:1.30.4'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.30.6'
@@ -33,6 +33,9 @@ dependencies {
 
     // For when we want to actually add makoto pictures
     implementation 'com.github.Kodehawa:imageboard-api:1907d46a98'
+
+    // Log4J2
+    implementation group: 'org.apache.logging.log4j', name: 'log4j', version: '2.18.0', ext: 'pom'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
